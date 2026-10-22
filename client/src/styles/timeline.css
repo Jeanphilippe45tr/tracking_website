@@ -1,0 +1,85 @@
+/* ------------------------------------------------------------------
+   Timeline (vertical list of events)
+------------------------------------------------------------------ */
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0 0 0.25rem;
+  position: relative;
+}
+
+.timeline-item {
+  position: relative;
+  padding: 0 0 1.5rem 2rem;
+}
+
+/* The vertical line connecting all events. */
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--color-border);
+  z-index: 1;
+}
+
+.timeline-item.latest .timeline-marker {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.timeline-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+}
+
+.timeline-item.latest .timeline-content {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow);
+}
+
+.timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.timeline-date {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.timeline-location {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.timeline-desc {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}

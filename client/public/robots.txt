@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The staff area should never be indexed.
+Disallow: /admin
+
+Sitemap: https://www.swifttrack.cm/sitemap.xml

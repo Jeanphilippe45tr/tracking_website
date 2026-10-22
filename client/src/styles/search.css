@@ -1,0 +1,62 @@
+/* ------------------------------------------------------------------
+   Search box (hero + inline variants)
+------------------------------------------------------------------ */
+
+.search-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.search-input {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--color-text);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.search-btn {
+  flex: 0 0 auto;
+  padding: 0.85rem 1.6rem;
+  font-size: 1rem;
+}
+
+/* Large variant used in the hero. */
+.search-large .search-input {
+  padding: 1rem 1.15rem;
+  font-size: 1.05rem;
+}
+
+/* Small variant used inline (e.g. "track another number"). */
+.search-small .search-input,
+.search-small .search-btn {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.92rem;
+}
+
+.search-error {
+  flex-basis: 100%;
+  color: #fff;
+  background: var(--color-error);
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .search-btn {
+    flex: 1 1 100%;
+  }
+}

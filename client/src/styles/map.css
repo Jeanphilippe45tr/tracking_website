@@ -1,0 +1,85 @@
+/* ------------------------------------------------------------------
+   Map (Leaflet) — the canvas, the custom markers and the fallback.
+   ------------------------------------------------------------------ */
+
+.map-canvas {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: #e8eef5;
+  z-index: 1;
+}
+
+/* Leaflet needs an explicit height to work, so we also set one. */
+.map-canvas .leaflet-container {
+  min-height: inherit;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+}
+
+/* ---------------- Custom marker ---------------- */
+.map-pin-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.map-pin {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--pin, #f5821f);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.4);
+}
+
+.map-pin.is-active {
+  width: 20px;
+  height: 20px;
+  margin: -2px;
+  box-shadow: 0 0 0 6px rgba(245, 130, 31, 0.25), 0 2px 8px rgba(15, 23, 42, 0.4);
+}
+
+/* ---------------- Popup ---------------- */
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.leaflet-popup-content {
+  font-family: var(--font);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin: 0.7rem 0.85rem;
+}
+
+/* ---------------- Fallback ---------------- */
+.map-fallback {
+  border-radius: var(--radius-sm);
+  border: 2px dashed var(--color-border);
+  background: repeating-linear-gradient(
+    45deg,
+    #eef2f7,
+    #eef2f7 12px,
+    #e6ecf4 12px,
+    #e6ecf4 24px
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 1.5rem;
+}
+
+.map-fallback-title {
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0.6rem 0 0.25rem;
+}
+
+.map-fallback-text {
+  font-size: 0.88rem;
+  max-width: 42ch;
+  margin: 0;
+}

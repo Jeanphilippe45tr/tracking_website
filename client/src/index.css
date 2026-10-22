@@ -1,0 +1,4 @@
+/* Entry stylesheet. All real styles live in ./styles/*.css and are
+   imported by the components that use them. This file just pulls in the
+   global tokens/reset so they load first. */
+@import "./styles/global.css";

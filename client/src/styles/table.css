@@ -1,0 +1,86 @@
+/* ------------------------------------------------------------------
+   Data tables — shared by the admin area and the public rate card.
+   ------------------------------------------------------------------ */
+
+/* ---------------- Tables ---------------- */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 2px solid var(--color-border);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.cell-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 640px) {
+  /* Turn tables into stacked cards for small screens. */
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table,
+  .data-table tbody,
+  .data-table tr,
+  .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table tr {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: #fff;
+  }
+
+  .data-table td {
+    border: none;
+    padding: 0.4rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  /* Show the column name (from data-label) before the value. */
+  .data-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .cell-actions {
+    justify-content: flex-end;
+  }
+}

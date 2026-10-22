@@ -1,0 +1,112 @@
+/* ------------------------------------------------------------------
+   Progress stepper (Created -> ... -> Delivered)
+------------------------------------------------------------------ */
+
+.stepper-wrap {
+  margin: 1.5rem 0;
+}
+
+.stepper-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.stepper {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.step {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  padding-top: 0.25rem;
+}
+
+/* Connecting line between dots. */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: -50%;
+  width: 100%;
+  height: 3px;
+  background: var(--color-border);
+  z-index: 0;
+}
+
+.step:first-child::before {
+  display: none;
+}
+
+.step.done::before,
+.step.current::before {
+  background: var(--status-delivered);
+}
+
+.step.current.delayed::before {
+  background: var(--status-delayed);
+}
+
+.step-dot {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.step.done .step-dot {
+  background: var(--status-delivered);
+  border-color: var(--status-delivered);
+  color: #fff;
+}
+
+.step.current .step-dot {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(245, 130, 31, 0.2);
+}
+
+.step.current.delayed .step-dot {
+  border-color: var(--status-delayed);
+  color: var(--status-delayed);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.18);
+}
+
+.step-label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.step.done .step-label,
+.step.current .step-label {
+  color: var(--color-text);
+}
+
+/* On very small screens, hide labels to keep the bar readable. */
+@media (max-width: 560px) {
+  .step-label {
+    font-size: 0.68rem;
+  }
+}

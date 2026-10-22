@@ -1,0 +1,40 @@
+/* ------------------------------------------------------------------
+   Status badges — one colour per allowed status.
+------------------------------------------------------------------ */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* The class slug comes from the status string, lowercased and hyphenated:
+   "Picked up" -> status-picked-up */
+.status-created {
+  background: var(--status-created);
+}
+
+.status-picked-up {
+  background: var(--status-picked-up);
+}
+
+.status-in-transit {
+  background: var(--status-in-transit);
+}
+
+.status-out-for-delivery {
+  background: var(--status-out-for-delivery);
+}
+
+.status-delivered {
+  background: var(--status-delivered);
+}
+
+.status-delayed {
+  background: var(--status-delayed);
+}

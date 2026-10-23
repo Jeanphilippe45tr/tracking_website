@@ -9,7 +9,7 @@ const Shipment = sequelize.define(
   "Shipment",
   {
     trackingNumber: {
-      type: DataTypes.STRING(12),
+      type: DataTypes.STRING(32), // Increased from 12 to 32 characters
       unique: true,
       allowNull: false,
     },
@@ -134,6 +134,10 @@ const LiveSession = sequelize.define(
   },
   { timestamps: true, updatedAt: "updatedAt" }
 );
+
+// -------------------------------------------------------------------
+// Exports
+// -------------------------------------------------------------------
 
 module.exports = {
   sequelize,

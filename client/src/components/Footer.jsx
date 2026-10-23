@@ -14,6 +14,7 @@ const COLUMNS = [
     title: "Track & ship",
     links: [
       { label: "Track a parcel", to: "/track" },
+      { label: "Live parcel map", to: "/live" },
       { label: "Find a relay point", to: "/relay-points" },
       { label: "Rates & pricing", to: "/pricing" },
       { label: "Shipping guide", to: "/help" },
@@ -102,7 +103,7 @@ export default function Footer() {
         <div className="footer-brand">
           <Logo size={32} />
           <p className="footer-tagline">
-            Fast, reliable parcel tracking across Cameroon, France and beyond.
+            Fast, reliable parcel tracking across the US, Europe and Asia.
           </p>
 
           <ul className="footer-contact">
@@ -155,7 +156,7 @@ export default function Footer() {
       {/* ---------------- COUNTRIES STRIP ---------------- */}
       <div className="container footer-countries">
         <span className="footer-countries-label">
-          Shipping to {COUNTRIES.length * 2}+ destinations
+          Shipping to 180+ countries
         </span>
         <ul>
           {COUNTRIES.slice(0, 10).map((country) => (
@@ -195,8 +196,8 @@ export default function Footer() {
         <ul className="footer-payments" aria-label="Accepted payment methods">
           <li>VISA</li>
           <li>mastercard</li>
-          <li>MTN MoMo</li>
-          <li>Orange Money</li>
+          <li>AMEX</li>
+          <li>PayPal</li>
         </ul>
       </div>
     </footer>

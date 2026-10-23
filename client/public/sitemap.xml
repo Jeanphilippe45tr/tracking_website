@@ -1,52 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.swifttrack.cm/</loc>
+    <loc>https://www.swifttrack.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/track</loc>
+    <loc>https://www.swifttrack.com/track</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/relay-points</loc>
+    <loc>https://www.swifttrack.com/relay-points</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/services</loc>
+    <loc>https://www.swifttrack.com/services</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/pricing</loc>
+    <loc>https://www.swifttrack.com/pricing</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/about</loc>
+    <loc>https://www.swifttrack.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/help</loc>
+    <loc>https://www.swifttrack.com/help</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/contact</loc>
+    <loc>https://www.swifttrack.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/terms</loc>
+    <loc>https://www.swifttrack.com/live</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.swifttrack.com/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.swifttrack.cm/privacy</loc>
+    <loc>https://www.swifttrack.com/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

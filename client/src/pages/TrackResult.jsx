@@ -7,6 +7,8 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getShipmentByTrackingNumber } from "../api/shipments";
+import { useLiveTracking } from "../context/LiveTrackingContext";
+import { positionAt, trailAt } from "../lib/liveTracking";
 import StatusBadge from "../components/StatusBadge";
 import ProgressStepper from "../components/ProgressStepper";
 import Timeline from "../components/Timeline";
@@ -19,6 +21,7 @@ import { coordsFor, DEFAULT_CENTER } from "../data/geo";
 import { BRAND } from "../data/site";
 import "../styles/pages.css";
 import "../styles/content.css";
+import "../styles/live.css";
 
 // The carriers we can show next to a shipment.
 const CARRIERS = ["SwiftTrack Express", "SwiftTrack Standard", "DHL Express", "UPS", "FedEx"];
@@ -43,6 +46,7 @@ function estimateDelivery(shipment) {
 
 export default function TrackResult() {
   const { trackingNumber } = useParams();
+  const live = useLiveTracking();
 
   const [shipment, setShipment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,8 +86,21 @@ export default function TrackResult() {
   }, [loadShipment]);
 
   // The map points: origin, destination and every scanned location.
+  // If the admin simulation is running for THIS shipment, we also add the
+  // moving live marker and the travelled part of the route.
   const mapData = useMemo(() => {
-    if (!shipment) return { points: [], route: null, center: DEFAULT_CENTER };
+    if (!shipment) {
+      return {
+        points: [],
+        route: null,
+        trail: null,
+        center: DEFAULT_CENTER,
+        isLive: false,
+      };
+    }
+
+    const liveForShipment =
+      live.route.length > 0 && live.trackNumber === shipment.trackingNumber;
 
     const points = [];
     const origin = coordsFor(shipment.origin);
@@ -121,14 +138,35 @@ export default function TrackResult() {
       });
     });
 
-    const route = origin && destination ? [origin, destination] : null;
+    let route = origin && destination ? [origin, destination] : null;
+    let trail = null;
+
+    if (liveForShipment) {
+      route = live.route;
+      trail = trailAt(live.route, live.progress);
+      const position = positionAt(live.route, live.progress);
+      if (position) {
+        points.push({
+          lat: position.lat,
+          lng: position.lng,
+          title: "Live position",
+          subtitle: `${live.statusLabel} · ${Math.round(
+            live.progress * 100
+          )}% of the route`,
+          color: "#16a34a",
+          kind: "live",
+        });
+      }
+    }
 
     return {
       points,
       route,
+      trail,
       center: origin || destination || DEFAULT_CENTER,
+      isLive: liveForShipment,
     };
-  }, [shipment]);
+  }, [shipment, live]);
 
   // Copy the tracking link so the recipient can open it too.
   const handleCopy = async () => {
@@ -225,6 +263,12 @@ export default function TrackResult() {
               </p>
             </div>
             <div className="track-header-side">
+              {mapData.isLive && (
+                <span className={`live-inline is-${live.status}`}>
+                  <span className="live-dot" />
+                  Live · {live.statusLabel}
+                </span>
+              )}
               <StatusBadge status={shipment.status} />
               <span className="track-carrier">
                 <Icon name="truck" size={15} /> {CARRIERS[shipment.id % CARRIERS.length]}
@@ -289,13 +333,18 @@ export default function TrackResult() {
             <MapView
               points={mapData.points}
               route={mapData.route}
+              trail={mapData.trail}
               center={mapData.center}
               zoom={6}
               height={330}
+              follow={mapData.isLive}
+              fit={!mapData.isLive}
             />
             <p className="track-map-caption">
-              <Icon name="map" size={14} /> Markers show the origin, the
-              destination and every location scanned so far.
+              <Icon name="map" size={14} />{" "}
+              {mapData.isLive
+                ? "Live position — the map follows the parcel as it moves."
+                : "Markers show the origin, the destination and every location scanned so far."}
             </p>
           </div>
         </div>
@@ -338,7 +387,7 @@ export default function TrackResult() {
           </div>
           <div>
             <span className="info-muted">Insured for</span>
-            <strong>500 000 FCFA</strong>
+            <strong>$10,000</strong>
           </div>
         </div>
 

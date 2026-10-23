@@ -23,8 +23,8 @@ import {
 // the mock arrays through the objects it received.
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
-// Lower-case and strip the accents so that "Yaoundé" also finds
-// "Yaounde" (the spelling used in the shipped data).
+// Lower-case and strip the accents so that "São Paulo" also finds
+// "Sao Paulo" (the spelling used in the shipped data).
 const fold = (value) =>
   String(value ?? "")
     .toLowerCase()

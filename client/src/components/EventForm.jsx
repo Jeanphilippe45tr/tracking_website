@@ -91,7 +91,7 @@ export default function EventForm({ trackingNumber, onAdded }) {
             name="location"
             type="text"
             className={`form-input ${errors.location ? "invalid" : ""}`}
-            placeholder="e.g. Douala Hub"
+            placeholder="e.g. New York Hub"
             value={values.location}
             onChange={handleChange}
             aria-invalid={Boolean(errors.location)}

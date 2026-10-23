@@ -18,17 +18,17 @@ const DETAILS = {
     text: "Our express network runs dedicated vehicles on the main corridors. Anything handed over before 4pm is on the delivery van of the next working day.",
     facts: [
       ["Cut-off time", "16:00 for next-day delivery"],
-      ["Coverage", "Douala, Yaoundé, Bafoussam, Bamenda, Kribi"],
+      ["Coverage", "New York, Boston, Chicago, Los Angeles, London"],
       ["Proof of delivery", "Signature or photo of the recipient"],
       ["Best for", "Documents, samples, forgotten parcels"],
     ],
   },
   international: {
-    headline: "From Cameroon to the world, duties included",
+    headline: "From New York to the world, duties included",
     text: "We fly and sail your parcel through our own gateways. Customs paperwork is prepared by our team, so your parcel leaves the country without a question.",
     facts: [
       ["Transit time", "5 to 10 working days"],
-      ["Destinations", "France, Europe, Gulf, Asia, West Africa"],
+      ["Destinations", "Europe, Asia, the Middle East, Latin America"],
       ["Customs", "DDP — duties and taxes included in the rate"],
       ["Best for", "Sending stock, samples and gifts abroad"],
     ],
@@ -37,9 +37,9 @@ const DETAILS = {
     headline: "A pickup point in almost every neighbourhood",
     text: "Instead of waiting at home, your customer can collect the parcel at a supermarket, a pharmacy or a post office near them. Free for both sender and recipient.",
     facts: [
-      ["Network", "2 400+ partner points"],
+      ["Network", "2,400+ partner points"],
       ["Opening hours", "Most open 7 days, some until 21:00"],
-      ["Payment on collection", "Cash, mobile money or card"],
+      ["Payment on collection", "Card, contactless or cash"],
       ["Best for", "Recipients who are not at home"],
     ],
   },
@@ -65,7 +65,7 @@ const DETAILS = {
   },
   fulfilment: {
     headline: "Your stock, our warehouse",
-    text: "Store your goods in a secure hub in Douala or Yaoundé. We pick and pack orders while you concentrate on selling.",
+    text: "Store your goods in a secure hub in New York, London or Singapore. We pick and pack orders while you concentrate on selling.",
     facts: [
       ["Storage", "Bonded and climate-controlled"],
       ["Picking", "Same day on stock received before 14:00"],

@@ -31,34 +31,34 @@ const VALUES = [
   {
     icon: "globe",
     title: "Think local first",
-    text: "We were born in Bonanjo. Our routes, our prices and our opening hours are built around the way people actually ship in Cameroon.",
+    text: "We started in Brooklyn. Every city we enter keeps its own routes, prices and opening hours — global reach with a local feel.",
   },
 ];
 
 const TEAM = [
   {
-    name: "Amadou Nkoulou",
+    name: "Marcus Reed",
     role: "Founder & CEO",
     avatar: "https://randomuser.me/api/portraits/men/11.jpg",
     text: "Started SwiftTrack with one van in 2014. Still answers the support line every morning.",
   },
   {
-    name: "Estelle Mbarga",
+    name: "Elena Rossi",
     role: "Head of Operations",
     avatar: "https://randomuser.me/api/portraits/women/65.jpg",
-    text: "Runs our twelve sorting hubs and makes sure a parcel never sleeps in a corner.",
+    text: "Runs our 35 sorting hubs and makes sure a parcel never sleeps in a corner.",
   },
   {
-    name: "Yves Tchoupo",
+    name: "Daniel Kim",
     role: "Head of Technology",
     avatar: "https://randomuser.me/api/portraits/men/45.jpg",
     text: "Built the tracking platform and the customer API used by more than 300 shops.",
   },
   {
-    name: "Nadège Fotso",
+    name: "Sofia Alvarez",
     role: "Customer Care Lead",
     avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-    text: "Leads our bilingual support team of 28 people in Douala and Yaoundé.",
+    text: "Leads our multilingual support team of 28 people in New York, London and Singapore.",
   },
 ];
 
@@ -68,8 +68,8 @@ export default function About() {
       <PageHero
         eyebrow="About us"
         title="We move parcels, and we tell you exactly where they are"
-        subtitle="SwiftTrack started with one van in Bonanjo in 2014. Ten years later we run twelve hubs, a network of 2 400 relay points and the tracking platform you are using right now."
-        image={IMAGES.road}
+        subtitle="SwiftTrack started with one van in Brooklyn in 2014. Twelve years later we run 35 hubs, a network of 2,400 relay points and the tracking platform you are using right now."
+        image={IMAGES.aboutUs}
       />
 
       {/* ---------------- STORY ---------------- */}
@@ -77,14 +77,14 @@ export default function About() {
         <div className="container why-layout">
           <div className="why-media">
             <img
-              src={IMAGES.fleet}
-              alt="The SwiftTrack fleet ready for a delivery round"
+              src={IMAGES.aboutUs}
+              alt="The SwiftTrack team at our New York hub"
               loading="lazy"
             />
             <div className="why-media-card">
               <span className="why-media-value">{BRAND.founded}</span>
               <span className="why-media-label">
-                founded in Douala,
+                founded in Brooklyn,
                 <br />
                 still family owned
               </span>
@@ -95,22 +95,22 @@ export default function About() {
             <SectionHeading
               eyebrow="Our story"
               title="It started with a phone book"
-              subtitle="In 2014, Amadou delivered parcels between Akwa and Bonanjo with a second-hand van and a notebook full of phone numbers. Customers kept asking the same question: “where is my parcel?”"
+              subtitle="In 2014, Marcus delivered parcels between Brooklyn and Manhattan with a second-hand van and a notebook full of phone numbers. Customers kept asking the same question: “where is my parcel?”"
               align="left"
             />
 
             <p className="about-text">
               We built the first version of the tracking page the same year —
               a simple page that showed the last place a parcel had been seen.
-              Ten years later the page is used by more than 1.2 million parcels
+              Twelve years later the page is used by more than 1.2 million parcels
               a year, but the promise has not changed: if we know where your
               parcel is, you can see it too.
             </p>
 
             <p className="about-text">
-              Today SwiftTrack is a Cameroonian company with offices in
-              Douala, Yaoundé and Paris. We still collect, sort and deliver
-              every parcel ourselves, and we still answer the phone ourselves.
+              Today SwiftTrack is an American company with offices in New York,
+              London and Singapore. We still collect, sort and deliver every
+              parcel ourselves, and we still answer the phone ourselves.
             </p>
 
             <Link to="/contact" className="btn btn-secondary">
@@ -148,7 +148,7 @@ export default function About() {
         <div className="container container-narrow">
           <SectionHeading
             eyebrow="Milestones"
-            title="Ten years, step by step"
+            title="Twelve years, step by step"
             subtitle="The moments that changed the way we work."
           />
 
@@ -238,8 +238,8 @@ export default function About() {
               <h2>Join the team</h2>
               <p>
                 We are hiring couriers, hub operators and software engineers in
-                Douala, Yaoundé and Paris. A laptop, a phone and a good pair of
-                shoes are all you need to start.
+                New York, London and Singapore. A laptop, a phone and a good
+                pair of shoes are all you need to start.
               </p>
             </div>
             <Link to="/contact" className="btn btn-primary btn-lg">

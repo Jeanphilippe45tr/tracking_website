@@ -43,8 +43,13 @@ export default function TopBar() {
             </button>
           </li>
           <li>
-            <button type="button" className="topbar-select">
-              <span>XAF</span>
+            <button
+              type="button"
+              className="topbar-select"
+              title="All prices are shown in US dollars"
+              aria-label="Currency: US dollar"
+            >
+              <span>USD</span>
               <Icon name="chevronDown" size={13} />
             </button>
           </li>

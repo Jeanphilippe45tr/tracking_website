@@ -26,12 +26,12 @@ const GUIDES = [
   },
   {
     icon: "globe",
-    title: "Shipping to France: customs explained",
+    title: "Shipping to Europe: customs explained",
     text: "Documents, duties and the DDP option that means no surprise bills on delivery.",
     time: "5 min read",
     body: [
-      "Every parcel leaving Cameroon needs a commercial invoice and a proof of payment. The invoice lists the goods, their value, their weight and the country of origin — a photo of a receipt is enough for small gifts.",
-      "Shipments over 250 000 FCFA in value are checked by customs. DDP (duties and taxes paid) means we clear the file and pay the duties on your behalf, so the recipient is never asked to pay on the doorstep.",
+      "Every parcel entering the European Union needs a commercial invoice and proof of payment. The invoice lists the goods, their value, their weight and the country of origin — a photo of a receipt is enough for small gifts.",
+      "Shipments over €150 in value may attract import VAT, and higher-value goods can face duty. DDP (duties and taxes paid) means we clear the file and pay the charges on your behalf, so the recipient is never asked to pay on the doorstep.",
       "Keep the invoice for at least three years. If the parcel is inspected, our team may ask for the original document.",
     ],
   },
@@ -43,7 +43,7 @@ const GUIDES = [
     body: [
       "Bring the tracking reference and a piece of ID that matches the name on the parcel. If the parcel was sent to a company, add your business card.",
       "We hold a parcel for ten days at the relay point. After that it goes back to the hub, and a second storage fee applies.",
-      "Payment on collection is accepted in cash, by card and by mobile money. We never ask for a transfer before handing the parcel over.",
+      "Payment on collection is accepted by card, contactless and, in selected regions, cash. We never ask for a transfer before handing the parcel over.",
     ],
   },
   {
@@ -255,9 +255,9 @@ export default function Help() {
             <div className="help-contact-text">
               <h2>Did not find your answer?</h2>
               <p>
-                Our support team is open seven days a week, from 07:00 to 21:00
-                (UTC+1). We answer in French and English, usually within two
-                minutes.
+                Our support team is open every day, from 08:00 to 20:00 ET. We
+                answer in English, Spanish, French and German, usually within
+                two minutes.
               </p>
               <ul>
                 <li>

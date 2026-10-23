@@ -13,32 +13,32 @@ import "../styles/pages.css";
 import "../styles/content.css";
 import "../styles/table.css";
 
-// Rough price per kg above the first kilogram, per destination type.
+// Rough price per kg above the first kilogram, per destination type (USD).
 const EXTRA_PER_KG = {
-  national: 900,
-  regional: 2200,
-  international: 4800,
+  domestic: 6,
+  europe: 14,
+  international: 24,
 };
 
 const DESTINATIONS = [
-  { id: "national", label: "Another city in Cameroon" },
-  { id: "regional", label: "Another West African country" },
-  { id: "international", label: "Europe, Gulf or Asia" },
+  { id: "domestic", label: "Within the United States" },
+  { id: "europe", label: "Europe" },
+  { id: "international", label: "Asia, Middle East & Oceania" },
 ];
 
 export default function Pricing() {
   const [weight, setWeight] = useState(1);
-  const [destination, setDestination] = useState("national");
+  const [destination, setDestination] = useState("domestic");
   const [service, setService] = useState("standard");
 
   // The estimate is calculated from the selected service and weight.
   const estimate = useMemo(() => {
-    const base = { standard: 3500, express: 6500, international: 18000 }[service];
+    const base = { standard: 29, express: 59, international: 89 }[service];
     const zone = EXTRA_PER_KG[destination];
     const extraKg = Math.max(0, Number(weight) - 1);
     const total = base + extraKg * zone;
     return {
-      total: total.toLocaleString("fr-FR"),
+      total: `$${total.toLocaleString("en-US")}`,
       extraKg,
       days: { standard: "2 – 4 days", express: "next day", international: "5 – 10 days" }[service],
     };
@@ -49,7 +49,7 @@ export default function Pricing() {
       <PageHero
         eyebrow="Rates & pricing"
         title="Simple prices, no surprises"
-        subtitle="Everything is insured and tracked as standard. What you see below is what you pay — customs duties included on international shipments."
+        subtitle="Everything is insured and tracked as standard. What you see below is what you pay — customs duties included on DDP international shipments."
         image={IMAGES.port}
       />
 
@@ -59,7 +59,7 @@ export default function Pricing() {
           <SectionHeading
             eyebrow="Our services"
             title="Three ways to ship"
-            subtitle="All rates include tracking, insurance up to 500 000 FCFA and delivery notifications."
+            subtitle="All rates include tracking, insurance up to $10,000 and delivery notifications."
           />
 
           <div className="pricing-grid">
@@ -104,9 +104,9 @@ export default function Pricing() {
           </div>
 
           <p className="pricing-note">
-            <Icon name="invoice" size={15} /> Prices are per parcel and exclude
-            customs duties on DDU shipments. Business customers receive volume
-            rates from 20 parcels a month.
+            <Icon name="invoice" size={15} /> All prices are in US dollars (USD).
+            Prices are per parcel and exclude customs duties on DDU shipments.
+            Business customers receive volume rates from 20 parcels a month.
           </p>
         </div>
       </section>
@@ -178,14 +178,14 @@ export default function Pricing() {
           <div className="estimator-result card">
             <p className="estimator-result-label">Indicative price</p>
             <p className="estimator-result-price">
-              {estimate.total} <span>FCFA</span>
+              {estimate.total} <span>USD</span>
             </p>
             <ul className="estimator-result-list">
               <li>
                 <Icon name="clock" size={15} /> Delivered in {estimate.days}
               </li>
               <li>
-                <Icon name="shield" size={15} /> Insured up to 500 000 FCFA
+                <Icon name="shield" size={15} /> Insured up to $10,000
               </li>
               <li>
                 <Icon name="radar" size={15} /> Live tracking included
@@ -210,7 +210,7 @@ export default function Pricing() {
         <div className="container">
           <SectionHeading
             eyebrow="Main routes"
-            title="Famous routes and their prices"
+            title="Popular routes and their prices"
             subtitle="A sample of the corridors we run every day."
           />
 
@@ -258,12 +258,12 @@ export default function Pricing() {
               <h3>Additional services</h3>
               <ul>
                 <li>
-                  Saturday delivery — <strong>2 000 FCFA</strong>
+                  Saturday delivery — <strong>$12</strong>
                 </li>
-                <li>Signature on delivery — <strong>500 FCFA</strong></li>
-                <li>Return to sender — <strong>1 500 FCFA</strong></li>
-                <li>Extended insurance (per 1 000 000 FCFA) —{" "}
-                  <strong>3 500 FCFA</strong></li>
+                <li>Signature on delivery — <strong>$5</strong></li>
+                <li>Return to sender — <strong>$10</strong></li>
+                <li>Extended insurance (per $10,000) —{" "}
+                  <strong>$25</strong></li>
               </ul>
             </div>
 
@@ -287,8 +287,8 @@ export default function Pricing() {
               </span>
               <h3>Payment methods</h3>
               <p>
-                MTN Mobile Money, Orange Money, Visa, Mastercard, bank
-                transfer, and cash on delivery in most relay points.
+                Visa, Mastercard, American Express, PayPal, Apple Pay, bank
+                transfer, and cash on delivery in selected regions.
               </p>
               <Link to="/help" className="link-btn">
                 Read the payment guide →

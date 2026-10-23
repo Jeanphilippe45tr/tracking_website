@@ -9,7 +9,7 @@ const SECTIONS = [
   {
     title: "Who we are",
     paragraphs: [
-      `${BRAND.name} Logistics SARL is the data controller for the information collected through this website and through our delivery service. Our registered office is at ${BRAND.address}. You can reach our data protection team at ${BRAND.email}.`,
+      `${BRAND.legalName} is the data controller for the information collected through this website and through our delivery service. Our registered office is at ${BRAND.address}. You can reach our data protection team at ${BRAND.email}.`,
     ],
   },
   {
@@ -47,12 +47,12 @@ const SECTIONS = [
   {
     title: "Your rights",
     paragraphs: [
-      "Under the Cameroonian data protection law you have the right to see the information we hold about you, to correct it, to ask us to delete it, to limit how we use it, and to receive a copy of it in a portable format.",
+      "Under the EU and UK General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA) and other applicable laws, you have the right to see the information we hold about you, to correct it, to ask us to delete it, to limit how we use it, and to receive a copy of it in a portable format.",
     ],
     list: [
       `Write to ${BRAND.email} with the subject “Data request” and the tracking number or the email address you used.`,
       "We answer within thirty days and we never charge for it.",
-      "If you are not satisfied with our answer, you can complain to the competent data protection authority.",
+      "If you are not satisfied with our answer, you can complain to your local data protection authority — for example the ICO in the UK or your EU supervisory authority.",
     ],
   },
   {
@@ -75,7 +75,7 @@ export default function Privacy() {
       eyebrow="Legal"
       title="Privacy policy"
       subtitle="What we collect, why we collect it, and how to get it back or have it deleted."
-      updated="12 September 2025"
+      updated="22 October 2026"
       sections={SECTIONS}
     />
   );

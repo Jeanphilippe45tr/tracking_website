@@ -6,6 +6,13 @@
 // their CDN, so there is nothing to download or host locally.
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+// Brand imagery stored in the project (so it ships with the site).
+// -------------------------------------------------------------------
+import aboutUsImg from "../assets/about-us.jpg";
+import expressDeliveryImg from "../assets/express-delivery.jpg";
+import relayPointImg from "../assets/relay-point.jpg";
+
 // Small helper so every image URL is built the same way.
 // `w` = width in px, `h` = optional height (the photo is cropped).
 export const img = (id, w = 1200, h = 800, extra = "") =>
@@ -16,13 +23,14 @@ export const img = (id, w = 1200, h = 800, extra = "") =>
 // -------------------------------------------------------------------
 export const BRAND = {
   name: "SwiftTrack",
-  tagline: "Parcel tracking across Cameroon, France and beyond",
-  email: "support@swifttrack.cm",
-  phone: "+237 6 99 00 11 22",
-  phoneHref: "+237699001122",
-  whatsapp: "+237 6 99 00 11 22",
-  address: "Rue Joss, Bonanjo — Douala, Cameroon",
-  hours: "Mon – Sat · 08:00 – 19:00",
+  legalName: "SwiftTrack Logistics Inc.",
+  tagline: "Global parcel tracking across the US, Europe and Asia",
+  email: "support@swifttrack.com",
+  phone: "+1 (212) 555-0142",
+  phoneHref: "+12125550142",
+  whatsapp: "+1 (212) 555-0142",
+  address: "350 Fifth Avenue, Suite 4200, New York, NY 10118, USA",
+  hours: "Every day · 08:00 – 20:00 ET",
   founded: 2014,
 };
 
@@ -49,17 +57,17 @@ export const NAV = {
       {
         to: "/services#express",
         title: "Express delivery",
-        text: "Next-day and 48-hour deliveries across Cameroon.",
+        text: "Next-day and 48-hour deliveries across the US and Europe.",
       },
       {
         to: "/services#international",
         title: "International shipping",
-        text: "Door-to-door to France, Europe and the rest of the world.",
+        text: "Door-to-door to Europe, Asia, the Middle East and beyond.",
       },
       {
         to: "/services#relay",
         title: "Relay points",
-        text: "Collect or drop off your parcel at 2 400+ partner shops.",
+        text: "Collect or drop off your parcel at 2,400+ partner shops.",
       },
       {
         to: "/services#freight",
@@ -75,7 +83,7 @@ export const NAV = {
     to: "/about",
     items: [
       { to: "/about", title: "About SwiftTrack", text: "Who we are and how we got here." },
-      { to: "/about#story", title: "Our story", text: "From one van in Douala to 12 hubs." },
+      { to: "/about#story", title: "Our story", text: "From one van in Brooklyn to 35 hubs." },
       { to: "/help", title: "Help centre", text: "Guides, customs rules and common questions." },
       { to: "/contact", title: "Contact us", text: "Talk to a human in under 2 minutes." },
     ],
@@ -103,6 +111,9 @@ export const IMAGES = {
   courier: img("photo-1566576912321-d58ddd7a6088", 900, 700),
   road: img("photo-1494412574643-ff11b0a5c1c3", 1200, 800),
   counter: img("photo-1556742049-0cfed4f6a45d", 900, 700),
+  aboutUs: aboutUsImg,
+  express: expressDeliveryImg,
+  relay: relayPointImg,
 };
 
 // -------------------------------------------------------------------
@@ -110,8 +121,8 @@ export const IMAGES = {
 // -------------------------------------------------------------------
 export const STATS = [
   { value: "1.2M+", label: "Parcels tracked", hint: "since 2014" },
-  { value: "180+", label: "Countries served", hint: "across 5 continents" },
-  { value: "2 400+", label: "Relay points", hint: "partner shops" },
+  { value: "180+", label: "Countries served", hint: "across 6 continents" },
+  { value: "2,400+", label: "Relay points", hint: "partner shops" },
   { value: "98.6%", label: "On-time delivery", hint: "last 12 months" },
 ];
 
@@ -119,7 +130,7 @@ export const TRUST_POINTS = [
   {
     icon: "shield",
     title: "Every parcel insured",
-    text: "Up to 500 000 FCFA per shipment, included as standard.",
+    text: "Up to $10,000 per shipment, included as standard.",
   },
   {
     icon: "bolt",
@@ -129,12 +140,12 @@ export const TRUST_POINTS = [
   {
     icon: "globe",
     title: "Customs handled",
-    text: "We pre-clear documents so your parcel never gets stuck.",
+    text: "We pre-clear documents for the US, EU and Asia so your parcel never gets stuck.",
   },
   {
     icon: "headset",
     title: "Real humans, 7 days",
-    text: "A bilingual support team (French / English) answers in minutes.",
+    text: "A multilingual support team (English, Spanish, French and German) answers in minutes.",
   },
 ];
 
@@ -147,14 +158,14 @@ export const SERVICES = [
     icon: "bolt",
     title: "Express delivery",
     text: "Priority air and road transport for parcels that cannot wait.",
-    points: ["Next working day in Douala & Yaoundé", "48h nationwide", "Signature on delivery"],
-    image: IMAGES.courier,
+    points: ["Next working day in 40+ metro areas", "48-hour nationwide delivery", "Signature on delivery"],
+    image: IMAGES.express,
   },
   {
     id: "international",
     icon: "globe",
     title: "International shipping",
-    text: "Door-to-door shipping to France, Europe, Asia and the Gulf.",
+    text: "Door-to-door shipping to Europe, Asia, the Middle East and Latin America.",
     points: ["Air freight from 3 to 5 days", "Door-to-door or relay point", "DDP — duties included"],
     image: IMAGES.airport,
   },
@@ -162,9 +173,9 @@ export const SERVICES = [
     id: "relay",
     icon: "pin",
     title: "Relay points",
-    text: "Pick up or drop off at more than 2 400 partner shops near you.",
-    points: ["Open 7 days a week", "Cash on delivery available", "Live opening hours"],
-    image: IMAGES.shop,
+    text: "Pick up or drop off at more than 2,400 partner shops near you.",
+    points: ["Open 7 days a week", "Card, contactless or cash", "Live opening hours"],
+    image: IMAGES.relay,
   },
   {
     id: "freight",
@@ -178,7 +189,7 @@ export const SERVICES = [
     id: "ecommerce",
     icon: "cart",
     title: "E-commerce logistics",
-    text: "A fulfilment partner for online shops selling across Africa.",
+    text: "A fulfilment partner for online shops selling across the US, Europe and Asia.",
     points: ["Same-day pick & pack", "Returns handling", "Weekly reconciliation"],
     image: IMAGES.warehouse,
   },
@@ -220,8 +231,8 @@ export const CARRIERS = [
   { name: "DHL", color: "#d40511", bg: "#ffcc00", tag: "Express" },
   { name: "UPS", color: "#351c15", bg: "#f7b500", tag: "Express" },
   { name: "FedEx", color: "#4d148c", bg: "#ff6600", tag: "Express" },
-  { name: "La Poste", color: "#ffd100", bg: "#0a2a5a", tag: "Postal" },
-  { name: "Cameroon Post", color: "#0f7a3d", bg: "#f5c518", tag: "Postal" },
+  { name: "USPS", color: "#004b87", bg: "#ffffff", tag: "Postal" },
+  { name: "Royal Mail", color: "#da291c", bg: "#ffd100", tag: "Postal" },
   { name: "GLS", color: "#0b7a3b", bg: "#ffffff", tag: "Road" },
   { name: "DPD", color: "#e30613", bg: "#ffffff", tag: "Road" },
   { name: "Aramex", color: "#0b3d91", bg: "#e30613", tag: "Air" },
@@ -231,18 +242,20 @@ export const CARRIERS = [
 // Countries we ship to (flag emoji + code for the flag CDN)
 // -------------------------------------------------------------------
 export const COUNTRIES = [
-  { code: "cm", name: "Cameroon", flag: "🇨🇲", hubs: 12 },
-  { code: "fr", name: "France", flag: "🇫🇷", hubs: 8 },
-  { code: "gb", name: "United Kingdom", flag: "🇬🇧", hubs: 3 },
+  { code: "us", name: "United States", flag: "🇺🇸", hubs: 10 },
+  { code: "ca", name: "Canada", flag: "🇨🇦", hubs: 2 },
+  { code: "mx", name: "Mexico", flag: "🇲🇽", hubs: 1 },
+  { code: "br", name: "Brazil", flag: "🇧🇷", hubs: 1 },
+  { code: "gb", name: "United Kingdom", flag: "🇬🇧", hubs: 4 },
   { code: "de", name: "Germany", flag: "🇩🇪", hubs: 4 },
+  { code: "fr", name: "France", flag: "🇫🇷", hubs: 3 },
+  { code: "nl", name: "Netherlands", flag: "🇳🇱", hubs: 2 },
   { code: "es", name: "Spain", flag: "🇪🇸", hubs: 2 },
-  { code: "us", name: "United States", flag: "🇺🇸", hubs: 2 },
-  { code: "cn", name: "China", flag: "🇨🇳", hubs: 3 },
-  { code: "sa", name: "Saudi Arabia", flag: "🇸🇦", hubs: 2 },
-  { code: "gh", name: "Ghana", flag: "🇬🇭", hubs: 2 },
-  { code: "ci", name: "Côte d'Ivoire", flag: "🇨🇮", hubs: 3 },
-  { code: "ng", name: "Nigeria", flag: "🇳🇬", hubs: 2 },
-  { code: "be", name: "Belgium", flag: "🇧🇪", hubs: 2 },
+  { code: "cn", name: "China", flag: "🇨🇳", hubs: 2 },
+  { code: "jp", name: "Japan", flag: "🇯🇵", hubs: 1 },
+  { code: "sg", name: "Singapore", flag: "🇸🇬", hubs: 1 },
+  { code: "au", name: "Australia", flag: "🇦🇺", hubs: 1 },
+  { code: "ae", name: "United Arab Emirates", flag: "🇦🇪", hubs: 1 },
 ];
 
 // -------------------------------------------------------------------
@@ -250,46 +263,46 @@ export const COUNTRIES = [
 // -------------------------------------------------------------------
 export const TESTIMONIALS = [
   {
-    name: "Aïcha N.",
-    role: "Yaoundé",
+    name: "Sophia R.",
+    role: "New York",
     avatar: "https://randomuser.me/api/portraits/women/44.jpg",
     rating: 5,
-    text: "I tracked my parcel from Douala to Paris in real time. Every scan was there, the customs form even. This is the first site that actually worked for me.",
+    text: "I tracked my parcel from New York to Paris in real time. Every scan was there, the customs form even. This is the first site that actually worked for me.",
   },
   {
-    name: "Jean-Marc T.",
-    role: "Lyon",
+    name: "Daniel K.",
+    role: "London",
     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
     rating: 5,
-    text: "I sell on Instagram and ship every order with SwiftTrack. The relay point in Part-Dieu means my customers can pick up on Saturday. Huge win for my business.",
+    text: "I sell on Instagram and ship every order with SwiftTrack. The relay point in Shoreditch means my customers can pick up on Saturday. Huge win for my business.",
   },
   {
-    name: "Mariam A.",
-    role: "Douala",
+    name: "Priya S.",
+    role: "Toronto",
     avatar: "https://randomuser.me/api/portraits/women/68.jpg",
     rating: 4,
-    text: "Support answered in French at 21:00 and sorted a delayed parcel in ten minutes. The delay badge warned me before the customer called.",
+    text: "Support answered in English at 21:00 and sorted a delayed parcel in ten minutes. The delay badge warned me before the customer called.",
   },
   {
-    name: "Serge O.",
-    role: "Bafoussam",
+    name: "Marco B.",
+    role: "Milan",
     avatar: "https://randomuser.me/api/portraits/men/75.jpg",
     rating: 5,
-    text: "I send fabric rolls to Garoua every week. Weight, dimensions, ETA — all shown before I pay. The admin side is clean and my clients love the tracking page.",
+    text: "I send fabric rolls to Berlin every week. Weight, dimensions, ETA — all shown before I pay. The admin side is clean and my clients love the tracking page.",
   },
   {
     name: "Nadia B.",
     role: "Brussels",
     avatar: "https://randomuser.me/api/portraits/women/21.jpg",
     rating: 5,
-    text: "Shipping from Cameroon to Europe used to mean two weeks of guessing. Now I give my customers a link and they follow the parcel themselves.",
+    text: "Shipping from Toronto to Europe used to mean two weeks of guessing. Now I give my customers a link and they follow the parcel themselves.",
   },
   {
-    name: "Kwame A.",
-    role: "Accra",
+    name: "Kenji T.",
+    role: "Tokyo",
     avatar: "https://randomuser.me/api/portraits/men/52.jpg",
     rating: 4,
-    text: "Door-to-door between Douala and Accra in six days with duties included. Price was better than the courier I used before.",
+    text: "Door-to-door between Singapore and Tokyo in four days with duties included. Price was better than the courier I used before.",
   },
 ];
 
@@ -299,7 +312,7 @@ export const TESTIMONIALS = [
 export const FAQ_HOME = [
   {
     q: "How long does delivery usually take?",
-    a: "Local deliveries within the same city usually take 1–2 working days. National shipments take 2–4 working days and international shipments take 5–10 working days depending on customs.",
+    a: "Local deliveries within the same city usually take 1–2 working days. Domestic shipments take 2–4 working days and international shipments take 5–10 working days depending on customs.",
   },
   {
     q: "My tracking number is not recognised. What should I do?",
@@ -348,7 +361,7 @@ export const FAQ_CATEGORIES = [
     items: [
       {
         q: "Which service should I pick?",
-        a: "Express for urgent parcels, Standard for the best price, and International for anything leaving Cameroon. The pricing page compares transit times and rates side by side.",
+        a: "Express for urgent parcels, Standard for the best price, and International for anything crossing a border. The pricing page compares transit times and rates side by side.",
       },
       {
         q: "What is the maximum weight and size?",
@@ -360,7 +373,7 @@ export const FAQ_CATEGORIES = [
       },
       {
         q: "Can I pay on delivery?",
-        a: "Yes, cash or mobile money at every relay point in Cameroon, and card on delivery in France.",
+        a: "Yes, card or contactless at every relay point in the US and Europe, and card on delivery in most countries.",
       },
     ],
   },
@@ -376,11 +389,11 @@ export const FAQ_CATEGORIES = [
       },
       {
         q: "Which documents do I need?",
-        a: "A copy of the recipient's ID and a proof of purchase (invoice or receipt). For shipments over 500 000 FCFA, a customs declaration signed by the sender.",
+        a: "A copy of the recipient's ID and a proof of purchase (invoice or receipt). For shipments valued over $2,500, a customs declaration signed by the sender.",
       },
       {
         q: "My parcel is held at customs, what now?",
-        a: "Open the tracking page — a “Customs hold” notice appears with the exact document we are missing. Send it to support@swifttrack.cm and we release the parcel the same day.",
+        a: "Open the tracking page — a “Customs hold” notice appears with the exact document we are missing. Send it to support@swifttrack.com and we release the parcel the same day.",
       },
       {
         q: "Are there restricted destinations?",
@@ -404,7 +417,7 @@ export const FAQ_CATEGORIES = [
       },
       {
         q: "Do relay points charge extra?",
-        a: "No. Dropping off and collecting are free, including cash on delivery.",
+        a: "No. Dropping off and collecting are free. If you are paying for the goods on delivery, the relay point collects that amount on behalf of the sender.",
       },
     ],
   },
@@ -416,15 +429,15 @@ export const FAQ_CATEGORIES = [
     items: [
       {
         q: "Which payment methods do you accept?",
-        a: "Mobile money (MTN MoMo and Orange Money), Visa and Mastercard, bank transfer for business accounts, and cash on delivery in most areas.",
+        a: "Visa, Mastercard, American Express, PayPal, Apple Pay, bank transfer for business accounts, and cash on delivery in selected regions.",
       },
       {
         q: "How do I get an invoice?",
-        a: "Every business account gets a VAT invoice by email after each shipment, and a monthly statement you can download from the admin dashboard.",
+        a: "Every business account gets a tax invoice by email after each shipment, and a monthly statement you can download from the admin dashboard.",
       },
       {
         q: "My parcel was lost — am I refunded?",
-        a: "All parcels are insured up to 500 000 FCFA. After 30 days without delivery we either resend the parcel or refund you in full, whichever you prefer.",
+        a: "All parcels are insured up to $10,000. After 30 days without delivery we either resend the parcel or refund you in full, whichever you prefer.",
       },
     ],
   },
@@ -439,13 +452,13 @@ export const RATE_CARDS = [
     name: "Standard",
     icon: "box",
     eta: "2 – 4 days",
-    price: "3 500 FCFA",
+    price: "$29",
     priceNote: "from 0 – 1 kg",
     best: "Best value for non-urgent parcels",
     features: [
       "Door-to-door delivery",
       "Tracking page for the sender",
-      "Insured up to 500 000 FCFA",
+      "Insured up to $10,000",
       "Free relay point drop-off",
     ],
     highlight: false,
@@ -455,7 +468,7 @@ export const RATE_CARDS = [
     name: "Express",
     icon: "bolt",
     eta: "Next working day",
-    price: "6 500 FCFA",
+    price: "$59",
     priceNote: "from 0 – 1 kg",
     best: "Urgent documents and samples",
     features: [
@@ -471,9 +484,9 @@ export const RATE_CARDS = [
     name: "International",
     icon: "globe",
     eta: "5 – 10 days",
-    price: "18 000 FCFA",
+    price: "$89",
     priceNote: "from 0 – 1 kg, DDP",
-    best: "Door-to-door Europe, Gulf and Asia",
+    best: "Door-to-door Europe, Asia and the Middle East",
     features: [
       "DDP — duties and taxes included",
       "Customs pre-clearance by our team",
@@ -485,13 +498,14 @@ export const RATE_CARDS = [
 ];
 
 export const ZONE_PRICES = [
-  { zone: "Douala → Yaoundé", service: "Express", price: "6 500 F", transit: "24 h" },
-  { zone: "Douala → Bamenda", service: "Standard", price: "5 200 F", transit: "2 days" },
-  { zone: "Yaoundé → Garoua", service: "Standard", price: "7 400 F", transit: "3 days" },
-  { zone: "Douala → Paris", service: "International", price: "18 000 F", transit: "6 days" },
-  { zone: "Yaoundé → Douala", service: "Express", price: "6 900 F", transit: "24 h" },
-  { zone: "Douala → Abidjan", service: "International", price: "21 500 F", transit: "7 days" },
-  { zone: "Bafoussam → Dschang", service: "Standard", price: "3 900 F", transit: "2 days" },
+  { zone: "New York → Boston", service: "Express", price: "$45", transit: "24 h" },
+  { zone: "New York → Los Angeles", service: "Standard", price: "$39", transit: "3 days" },
+  { zone: "Los Angeles → Chicago", service: "Standard", price: "$42", transit: "3 days" },
+  { zone: "New York → London", service: "International", price: "$89", transit: "5 days" },
+  { zone: "London → Paris", service: "Express", price: "$55", transit: "24 h" },
+  { zone: "Rotterdam → Berlin", service: "Standard", price: "$35", transit: "2 days" },
+  { zone: "Singapore → Sydney", service: "International", price: "$95", transit: "6 days" },
+  { zone: "New York → Tokyo", service: "International", price: "$115", transit: "7 days" },
 ];
 
 // -------------------------------------------------------------------
@@ -499,28 +513,28 @@ export const ZONE_PRICES = [
 // -------------------------------------------------------------------
 export const OFFICES = [
   {
-    city: "Douala",
+    city: "New York",
     role: "Headquarters & main hub",
-    address: "Rue Joss, Bonanjo, Douala",
-    phone: "+237 6 99 00 11 22",
-    hours: "Mon – Sat · 07:30 – 19:30",
-    map: "Douala, Cameroon",
+    address: "350 Fifth Avenue, Suite 4200, New York, NY 10118",
+    phone: "+1 (212) 555-0142",
+    hours: "Mon – Sat · 07:30 – 19:30 ET",
+    map: "350 Fifth Avenue, New York, NY",
   },
   {
-    city: "Yaoundé",
-    role: "Sorting centre & office",
-    address: "Avenue Kennedy, Centre, Yaoundé",
-    phone: "+237 6 99 00 33 44",
-    hours: "Mon – Sat · 08:00 – 18:30",
-    map: "Yaoundé, Cameroon",
-  },
-  {
-    city: "Paris",
+    city: "London",
     role: "European gateway",
-    address: "56 Rue de la Roquette, 75011 Paris",
-    phone: "+33 1 84 80 22 10",
-    hours: "Mon – Fri · 09:00 – 18:00",
-    map: "Paris, France",
+    address: "1 Canada Square, Canary Wharf, London E14 5AB",
+    phone: "+44 20 7946 0958",
+    hours: "Mon – Sat · 08:00 – 19:00 GMT",
+    map: "1 Canada Square, London",
+  },
+  {
+    city: "Singapore",
+    role: "Asia-Pacific gateway",
+    address: "8 Marina Boulevard, #12-01, Singapore 018981",
+    phone: "+65 6812 0055",
+    hours: "Mon – Sat · 08:30 – 19:00 SGT",
+    map: "8 Marina Boulevard, Singapore",
   },
 ];
 
@@ -530,28 +544,28 @@ export const OFFICES = [
 export const MILESTONES = [
   {
     year: "2014",
-    title: "One van in Douala",
-    text: "Amadou starts delivering parcels between Akwa and Bonanjo with a second-hand van and a phone book.",
+    title: "One van in Brooklyn",
+    text: "Marcus starts delivering parcels between Brooklyn and Manhattan with a second-hand van and a phone book.",
   },
   {
     year: "2017",
     title: "The first sorting centre",
-    text: "We open our Yaoundé hub and start handling national shipments overnight.",
+    text: "We open our New Jersey hub and start handling cross-country shipments overnight.",
   },
   {
     year: "2019",
-    title: "Paris gateway",
-    text: "Our first air freight partnership opens a direct line Cameroon → France in 48 hours.",
+    title: "London gateway",
+    text: "Our first transatlantic air freight partnership opens a direct New York → London line in 48 hours.",
   },
   {
     year: "2021",
     title: "Relay network goes live",
-    text: "Partner shops join in Douala, Yaoundé and Bafoussam, cutting failed deliveries by more than half.",
+    text: "Partner shops join in New York, London and Berlin, cutting failed deliveries by more than half.",
   },
   {
     year: "2024",
     title: "1.2 million parcels",
-    text: "Ten years of tracking data, 2 400 relay points and a live API for e-commerce customers.",
+    text: "Ten years of tracking data, 2,400 relay points and a live API for e-commerce customers.",
   },
 ];
 
@@ -560,8 +574,8 @@ export const MILESTONES = [
 // try the product straight away).
 // -------------------------------------------------------------------
 export const DEMO_NUMBERS = [
-  { number: "TRK000000001", label: "Delivered", hint: "Douala → Yaoundé" },
-  { number: "TRK3F9A12BC7D", label: "In transit", hint: "Yaoundé → Paris" },
-  { number: "TRK5B7C9D2EF1A", label: "Out for delivery", hint: "Paris → Lyon" },
-  { number: "TRK8A1B2C3D4E", label: "Delayed", hint: "Bafoussam → Bamenda" },
+  { number: "TRK000000001", label: "Delivered", hint: "New York → Boston" },
+  { number: "TRK3F9A12BC7D", label: "In transit", hint: "New York → London" },
+  { number: "TRK5B7C9D2EF1A", label: "Out for delivery", hint: "London → Paris" },
+  { number: "TRK8A1B2C3D4E", label: "Delayed", hint: "Berlin → Amsterdam" },
 ];

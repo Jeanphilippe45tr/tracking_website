@@ -4,4 +4,4 @@ Allow: /
 # The staff area should never be indexed.
 Disallow: /admin
 
-Sitemap: https://www.swifttrack.cm/sitemap.xml
+Sitemap: https://www.swifttrack.com/sitemap.xml

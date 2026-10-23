@@ -19,10 +19,12 @@ const TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 // A styled marker (a dot with a soft halo) instead of the default pin.
-function makeIcon(color, isActive) {
+function makeIcon(color, isActive, isLive) {
   return window.L.divIcon({
     className: "map-pin-wrapper",
-    html: `<span class="map-pin ${isActive ? "is-active" : ""}" style="--pin:${color}"></span>`,
+    html: `<span class="map-pin ${isActive ? "is-active" : ""} ${
+      isLive ? "is-live" : ""
+    }" style="--pin:${color}"></span>`,
     iconSize: [18, 18],
     iconAnchor: [9, 9],
     popupAnchor: [0, -10],
@@ -32,10 +34,13 @@ function makeIcon(color, isActive) {
 export default function MapView({
   points = [],
   route = null,
+  trail = null,
   center = DEFAULT_CENTER,
   zoom = 6,
   height = 420,
   emptyText = "No location to display yet.",
+  follow = false,
+  fit = true,
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
@@ -90,10 +95,36 @@ export default function MapView({
 
     const bounds = [];
 
+    // Full route first (dashed), then the part already travelled (solid)
+    // so the live map shows progress at a glance.
+    if (route && route.length >= 2) {
+      L.polyline(route, {
+        color: "#94a3b8",
+        weight: 3,
+        opacity: 0.7,
+        dashArray: "8 8",
+      }).addTo(map);
+      bounds.push(...route);
+    }
+
+    if (trail && trail.length >= 2) {
+      L.polyline(trail, {
+        color: "#f5821f",
+        weight: 4,
+        opacity: 0.95,
+      }).addTo(map);
+      bounds.push(...trail);
+    }
+
+    let livePoint = null;
+
     points.forEach((point, index) => {
       if (!point) return;
+      const isLive = point.kind === "live";
+      if (isLive) livePoint = point;
+
       const marker = L.marker([point.lat, point.lng], {
-        icon: makeIcon(point.color || "#f5821f", index === 0),
+        icon: makeIcon(point.color || "#f5821f", index === 0 && !isLive, isLive),
         title: point.title,
       }).addTo(map);
 
@@ -106,23 +137,19 @@ export default function MapView({
       bounds.push([point.lat, point.lng]);
     });
 
-    // The orange dashed line connecting origin → destination.
-    if (route && route.length >= 2) {
-      L.polyline(route, {
-        color: "#f5821f",
-        weight: 3,
-        opacity: 0.85,
-        dashArray: "8 8",
-      }).addTo(map);
-      bounds.push(...route);
-    }
-
-    if (bounds.length > 1) {
+    // The live map follows the moving parcel instead of refitting the
+    // whole route on every tick (which would make the map jump).
+    if (follow && livePoint) {
+      map.panTo([livePoint.lat, livePoint.lng], {
+        animate: true,
+        duration: 0.5,
+      });
+    } else if (fit && bounds.length > 1) {
       map.fitBounds(bounds, { padding: [40, 40] });
-    } else if (bounds.length === 1) {
+    } else if (fit && bounds.length === 1) {
       map.setView(bounds[0], 12);
     }
-  }, [points, route]);
+  }, [points, route, trail, follow, fit]);
 
   // Fallback panel when Leaflet could not be loaded.
   if (!leafletReady) {

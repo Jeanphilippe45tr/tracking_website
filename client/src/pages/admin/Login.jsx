@@ -131,7 +131,7 @@ export default function Login() {
 
         <p className="login-hint">
           Demo credentials: <code>admin@example.com</code> /{" "}
-          <code>admin123</code>
+          <code>admin123</code>. Change them in the admin Settings page.
         </p>
 
         <Link to="/" className="login-back">

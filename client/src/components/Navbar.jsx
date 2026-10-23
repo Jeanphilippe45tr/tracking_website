@@ -136,6 +136,9 @@ export default function Navbar() {
             <NavLink to={NAV.pricing.to} className={linkClass} onClick={closeMenu}>
               {NAV.pricing.label}
             </NavLink>
+            <NavLink to="/live" className={linkClass} onClick={closeMenu}>
+              Live map
+            </NavLink>
             <NavLink to={NAV.relay.to} className={linkClass} onClick={closeMenu}>
               {NAV.relay.label}
             </NavLink>
@@ -189,7 +192,7 @@ export default function Navbar() {
             <Icon name="bell" size={14} /> News
           </span>
           <p>
-            International shipping to France is now{" "}
+            Transatlantic shipping to Europe is now{" "}
             <strong>15% cheaper</strong> for the whole of October — duties
             included.
           </p>

@@ -10,7 +10,7 @@ const SECTIONS = [
     title: "About these terms",
     paragraphs: [
       `These terms apply to anyone using the ${BRAND.name} website, the public tracking pages and any parcel we carry on behalf of a sender or a recipient. By using the site you accept them. If you do not accept them, please stop using the site.`,
-      "The service itself is provided by SwiftTrack Logistics SARL, registered in Douala, Cameroon. Our office is at Rue Joss, Bonanjo, Douala.",
+      "The service itself is provided by SwiftTrack Logistics Inc., registered in Delaware, USA. Our principal office is at 350 Fifth Avenue, Suite 4200, New York, NY 10118.",
     ],
   },
   {
@@ -40,14 +40,14 @@ const SECTIONS = [
   {
     title: "Prices, payment and invoicing",
     paragraphs: [
-      "Prices are shown on the pricing page and include tracking, insurance up to 500 000 FCFA and delivery notifications. The final amount is confirmed once the parcel has been weighed and measured by our team.",
-      "Business customers can pay by bank transfer against a monthly invoice. Private customers pay by mobile money, card, or cash on delivery where the service is available.",
+      "Prices are shown on the pricing page and include tracking, insurance up to $10,000 and delivery notifications. The final amount is confirmed once the parcel has been weighed and measured by our team.",
+      "Business customers can pay by bank transfer against a monthly invoice. Private customers pay by card, PayPal or Apple Pay, with cash on delivery where the service is available.",
     ],
   },
   {
     title: "Insurance, loss and refunds",
     paragraphs: [
-      "Every parcel is insured up to 500 000 FCFA as standard. Extended insurance can be added at the time of booking. The value declared at drop-off is the maximum we will pay in case of loss or damage.",
+      "Every parcel is insured up to $10,000 as standard. Extended insurance can be added at the time of booking. The value declared at drop-off is the maximum we will pay in case of loss or damage.",
       "If a parcel is lost, we first resend it if that is what you prefer. If it cannot be resent, we refund the shipping price in full. A claim must be opened within 30 days of the expected delivery date.",
     ],
   },
@@ -61,7 +61,7 @@ const SECTIONS = [
     title: "Liability and governing law",
     paragraphs: [
       "We are responsible for the proper handling of your parcel. We are not responsible for indirect losses such as lost profit, unless the law says otherwise.",
-      "These terms are governed by the laws of Cameroon. Any dispute is first brought before the courts of Douala, unless both parties agree to arbitration.",
+      "These terms are governed by the laws of the State of New York. Any dispute is first brought before the courts of New York County, unless both parties agree to arbitration.",
     ],
   },
   {
@@ -79,7 +79,7 @@ export default function Terms() {
       eyebrow="Legal"
       title="Terms & conditions"
       subtitle="The rules that apply when you use SwiftTrack — our website and our delivery service."
-      updated="12 September 2025"
+      updated="22 October 2026"
       sections={SECTIONS}
     />
   );

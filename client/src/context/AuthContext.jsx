@@ -43,12 +43,20 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  // Called after the admin edits their profile in Settings so the name
+  // in the navbar / dashboard updates immediately.
+  const updateUser = useCallback((nextUser) => {
+    localStorage.setItem("user", JSON.stringify(nextUser));
+    setUser(nextUser);
+  }, []);
+
   const value = {
     token,
     user,
     isAuthenticated: Boolean(token),
     login,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

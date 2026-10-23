@@ -96,12 +96,12 @@ export default function RelayPoints() {
       {/* ---------------- HEADER ---------------- */}
       <section
         className="page-hero compact"
-        style={{ backgroundImage: `url(${IMAGES.shop})` }}
+        style={{ backgroundImage: `url(${IMAGES.relay})` }}
       >
         <div className="page-hero-overlay" />
         <div className="container page-hero-inner">
           <p className="page-hero-eyebrow">
-            <Icon name="pin" size={15} /> 2 400 relay points
+            <Icon name="pin" size={15} /> 2,400 relay points
           </p>
           <h1 className="page-hero-title">Find a relay point</h1>
           <p className="page-hero-subtitle">
@@ -122,7 +122,7 @@ export default function RelayPoints() {
                 id="relay-q"
                 type="text"
                 className="form-input"
-                placeholder="e.g. Douala, Yaoundé or 75011"
+                placeholder="e.g. New York, London or 10016"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -136,7 +136,7 @@ export default function RelayPoints() {
           </form>
 
           <ul className="relay-quick">
-            {["Douala", "Yaoundé", "Bafoussam", "Paris", "Lyon"].map((city) => (
+            {["New York", "London", "Paris", "Berlin", "Singapore"].map((city) => (
               <li key={city}>
                 <button
                   type="button"
@@ -247,8 +247,7 @@ export default function RelayPoints() {
             </span>
             <h3>Pay however you like</h3>
             <p>
-              Cash, MTN Mobile Money, Orange Money or card when you collect
-              your parcel.
+              Cash, card or contactless when you collect your parcel.
             </p>
           </div>
           <div className="relay-benefit card">

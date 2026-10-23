@@ -7,8 +7,26 @@ import { Link } from "react-router-dom";
 import { getShipments, STATUSES } from "../../api/shipments";
 import StatusBadge from "../../components/StatusBadge";
 import Spinner from "../../components/Spinner";
-import { formatDate } from "../../utils/format";
+import SimulationPanel from "../../components/SimulationPanel";
+import Icon from "../../components/Icon";
+import { formatDate, formatChatTime } from "../../utils/format";
+import {
+  lastMessage,
+  sortConversations,
+  unreadForAdmin,
+  useChatStore,
+} from "../../lib/chat";
 import "../../styles/admin.css";
+
+// Two-letter avatar for the message previews.
+function initials(name = "") {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "?";
+}
 
 export default function Dashboard() {
   const [shipments, setShipments] = useState([]);
@@ -18,6 +36,14 @@ export default function Dashboard() {
   // Search + filter for the recent table.
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+
+  // Shared chat inbox (updates live when a visitor writes).
+  const chatState = useChatStore();
+  const unreadMessages = unreadForAdmin(chatState);
+  const recentConversations = useMemo(
+    () => sortConversations(chatState.conversations).slice(0, 3),
+    [chatState.conversations]
+  );
 
   useEffect(() => {
     let active = true; // avoid setting state after unmount
@@ -102,6 +128,97 @@ export default function Dashboard() {
         <div className="stat-card card stat-delayed">
           <span className="stat-value">{stats.delayed}</span>
           <span className="stat-label">Delayed</span>
+        </div>
+      </div>
+
+      {/* ---------------- Live simulation + inbox ---------------- */}
+      <div className="dashboard-tools">
+        <SimulationPanel shipments={shipments} />
+
+        <div className="dashboard-side">
+          <section className="card dash-messages">
+            <div className="dash-msg-head">
+              <h2>
+                <Icon name="chat" size={17} /> Messages
+                {unreadMessages > 0 && (
+                  <span className="dash-msg-count">{unreadMessages}</span>
+                )}
+              </h2>
+              <Link to="/admin/messages" className="link-btn">
+                Inbox →
+              </Link>
+            </div>
+
+            {recentConversations.length === 0 ? (
+              <p className="info-muted" style={{ margin: "0.5rem 0 0" }}>
+                No conversations yet. Visitors can chat from any public page.
+              </p>
+            ) : (
+              <div className="dash-msg-list">
+                {recentConversations.map((conversation) => {
+                  const last = lastMessage(conversation);
+                  const unread = conversation.messages.filter(
+                    (message) =>
+                      message.from === "customer" && !message.readByAdmin
+                  ).length;
+                  return (
+                    <Link
+                      key={conversation.id}
+                      to="/admin/messages"
+                      state={{ conversationId: conversation.id }}
+                      className={`dash-msg-item ${
+                        unread > 0 ? "is-unread" : ""
+                      }`}
+                    >
+                      <span className="dash-msg-avatar" aria-hidden="true">
+                        {initials(conversation.name)}
+                      </span>
+                      <span className="dash-msg-main">
+                        <span className="dash-msg-top">
+                          <span className="dash-msg-name">
+                            {conversation.name}
+                          </span>
+                          <span className="dash-msg-time">
+                            {last ? formatChatTime(last.at) : ""}
+                          </span>
+                        </span>
+                        <span className="dash-msg-preview">
+                          {last ? last.text : "No messages yet"}
+                        </span>
+                      </span>
+                      {unread > 0 && (
+                        <span className="dash-msg-count">{unread}</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            <Link to="/admin/messages" className="dash-msg-all">
+              Open the full inbox <Icon name="arrowRight" size={14} />
+            </Link>
+          </section>
+
+          <section className="card">
+            <h2>
+              <Icon name="bolt" size={17} /> Quick actions
+            </h2>
+            <div className="quick-actions">
+              <Link to="/admin/shipments/new" className="quick-action">
+                <Icon name="plus" size={16} /> New shipment
+              </Link>
+              <Link to="/admin/shipments" className="quick-action">
+                <Icon name="parcel" size={16} /> All shipments
+              </Link>
+              <Link to="/admin/messages" className="quick-action">
+                <Icon name="chat" size={16} /> Message inbox
+              </Link>
+              <Link to="/admin/settings" className="quick-action">
+                <Icon name="shield" size={16} /> Settings
+              </Link>
+            </div>
+          </section>
         </div>
       </div>
 

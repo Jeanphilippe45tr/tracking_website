@@ -148,8 +148,8 @@ export default function Track() {
             <div>
               <h3>Still stuck?</h3>
               <p>
-                Our team answers in French and English, seven days a week, and
-                usually replies within two minutes.
+                Our team answers in English, Spanish, French and German, seven
+                days a week, and usually replies within two minutes.
               </p>
             </div>
             <div className="track-support-actions">

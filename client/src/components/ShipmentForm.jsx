@@ -122,12 +122,12 @@ export default function ShipmentForm({ onCreated }) {
       )}
 
       <div className="form-grid">
-        {field("Sender name", "senderName", "text", "e.g. John")}
-        {field("Receiver name", "receiverName", "text", "e.g. Marie")}
-        {field("Receiver phone", "receiverPhone", "tel", "+237600000000")}
+        {field("Sender name", "senderName", "text", "e.g. Jordan")}
+        {field("Receiver name", "receiverName", "text", "e.g. Maya")}
+        {field("Receiver phone", "receiverPhone", "tel", "+1 (555) 000-0000")}
         {field("Weight (kg)", "weight", "number", "2.5")}
-        {field("Origin city", "origin", "text", "e.g. Douala")}
-        {field("Destination city", "destination", "text", "e.g. Yaoundé")}
+        {field("Origin city", "origin", "text", "e.g. New York")}
+        {field("Destination city", "destination", "text", "e.g. London")}
       </div>
 
       <div className="form-group">

@@ -262,3 +262,53 @@ code {
   color: var(--color-text-muted);
   font-size: 0.9rem;
 }
+
+/* ---------------- Live indicator ---------------- */
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  animation: live-dot-pulse 1.8s ease-in-out infinite;
+  flex: none;
+}
+
+@keyframes live-dot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.08);
+  }
+}
+
+/* ---------------- Progress meter ---------------- */
+.progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-light),
+    var(--color-accent)
+  );
+  transition: width 0.4s ease;
+}
+
+.progress-fill.is-paused {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+.progress-fill.is-done {
+  background: linear-gradient(90deg, #15803d, #22c55e);
+}

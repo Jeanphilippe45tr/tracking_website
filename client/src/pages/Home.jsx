@@ -40,8 +40,8 @@ export default function Home() {
           </h1>
           <p className="hero-subtitle">
             Track your shipment in real time — from the moment it is picked up
-            in Douala to the moment it is signed for in Paris. No account, no
-            app, just your tracking number.
+            in New York to the moment it is signed for in London. No account,
+            no app, just your tracking number.
           </p>
 
           <div className="hero-search-card">
@@ -61,7 +61,7 @@ export default function Home() {
 
           <ul className="hero-badges">
             <li>
-              <Icon name="shield" size={16} /> Insured up to 500 000 FCFA
+              <Icon name="shield" size={16} /> Insured up to $10,000
             </li>
             <li>
               <Icon name="bolt" size={16} /> Scans updated every hour
@@ -148,13 +148,13 @@ export default function Home() {
       <section className="section">
         <div className="container why-layout">
           <div className="why-media">
-            <img src={IMAGES.warehouse} alt="Parcels being sorted in a SwiftTrack hub" loading="lazy" />
+            <img src={IMAGES.aboutUs} alt="The SwiftTrack team at work" loading="lazy" />
             <div className="why-media-card">
-              <span className="why-media-value">12</span>
+              <span className="why-media-value">35</span>
               <span className="why-media-label">
                 sorting hubs across
                 <br />
-                Cameroon and France
+                the US, Europe and Asia
               </span>
             </div>
           </div>
@@ -193,8 +193,8 @@ export default function Home() {
         <div className="container">
           <SectionHeading
             eyebrow="Coverage"
-            title="We deliver across Africa, Europe and beyond"
-            subtitle="Our own offices in Cameroon and France, plus partners on every route we sell."
+            title="We deliver across the Americas, Europe and Asia"
+            subtitle="Our own hubs in New York, London and Singapore, plus partners on every route we sell."
             light
           />
 
@@ -230,14 +230,14 @@ export default function Home() {
         <div className="container relay-teaser">
           <div className="relay-teaser-media">
             <img
-              src={IMAGES.shop}
+              src={IMAGES.relay}
               alt="A SwiftTrack relay point inside a partner shop"
               loading="lazy"
             />
             <div className="relay-teaser-badge">
               <Icon name="pin" size={20} />
               <span>
-                <strong>2 400+</strong>
+                <strong>2,400+</strong>
                 relay points
               </span>
             </div>

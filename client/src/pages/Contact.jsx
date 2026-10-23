@@ -9,6 +9,7 @@ import SectionHeading from "../components/SectionHeading";
 import FaqList from "../components/FaqList";
 import Icon from "../components/Icon";
 import { BRAND, IMAGES, OFFICES } from "../data/site";
+import { submitContactForm } from "../api/shipments";
 import "../styles/pages.css";
 import "../styles/content.css";
 
@@ -32,18 +33,20 @@ const FAQ = [
   },
 ];
 
-const EMPTY = { name: "", email: "", subject: "", message: "" };
+const EMPTY = { name: "", email: "", subject: "", message: "", "tracking-ref": "" };
 
 export default function Contact() {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setValues((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (apiError) setApiError("");
     if (sent) setSent(false);
   };
 
@@ -68,20 +71,31 @@ export default function Contact() {
     return next;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const validationErrors = validate();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
-    // No backend yet: simulate a short send with a loading state.
     setLoading(true);
-    setTimeout(() => {
+    setApiError("");
+
+    try {
+      await submitContactForm({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        subject: values.subject.trim(),
+        message: values.message.trim(),
+        trackingNumber: values["tracking-ref"]?.trim() || "",
+      });
       setLoading(false);
       setSent(true);
       setValues(EMPTY);
-    }, 700);
+    } catch (err) {
+      setLoading(false);
+      setApiError(err.message || "Could not send message. Please try again.");
+    }
   };
 
   return (
@@ -145,6 +159,12 @@ export default function Contact() {
             {sent && (
               <div className="alert alert-success" role="status">
                 ✅ Thanks! Your message has been sent. We will reply soon.
+              </div>
+            )}
+
+            {apiError && (
+              <div className="alert alert-error" role="alert">
+                {apiError}
               </div>
             )}
 
@@ -235,6 +255,8 @@ export default function Contact() {
                 type="text"
                 className="form-input"
                 placeholder="TRK000000001"
+                value={values["tracking-ref"] || ""}
+                onChange={handleChange}
               />
             </div>
 

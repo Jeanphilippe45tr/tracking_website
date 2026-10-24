@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useBrand, useSiteSettings } from "../../context/SettingsContext";
 import {
   changePassword,
   updatePreferences,
@@ -65,9 +66,13 @@ const STRENGTH = [
 
 export default function Settings() {
   const { user, updateUser } = useAuth();
+  const { updateBrand } = useSiteSettings();
+  const brand = useBrand();
   const account = useAdminAccount();
   const chatState = useChatStore();
   const unread = unreadForAdmin(chatState);
+
+  const [brandFormErrors, setBrandFormErrors] = useState({});
 
   // ---------------- Profile ----------------
   const [profile, setProfile] = useState({
@@ -88,9 +93,12 @@ export default function Settings() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   // ---------------- Preferences ----------------
-  const [chatPrefs, setChatPrefs] = useState({
-    chatWelcome: account.prefs.chatWelcome,
-    supportEmail: account.prefs.supportEmail,
+  const [brandForm, setBrandForm] = useState({
+    brandName: brand.name || "",
+    supportEmail: brand.email || "",
+    supportPhone: brand.phone || "",
+    whatsappNumber: brand.whatsapp || "",
+    chatWelcome: brand.chatWelcome || "",
   });
   const [notifyPrefs, setNotifyPrefs] = useState({
     notifyNewMessages: account.prefs.notifyNewMessages,
@@ -100,6 +108,25 @@ export default function Settings() {
     defaultSpeed: account.prefs.defaultSpeed,
   });
   const [savingPrefs, setSavingPrefs] = useState("");
+
+  // Re-sync the brand form when the provider loads fresh values, using
+  // the "compare during render" pattern (same as ShipmentsList) so no
+  // wasted render happens.
+  const [lastBrandKey, setLastBrandKey] = useState("");
+  const brandKey = `${brand.name}|${brand.email}|${brand.phone}|${brand.whatsapp}|${brand.chatWelcome}`;
+  if (brandKey !== lastBrandKey) {
+    setLastBrandKey(brandKey);
+    setBrandForm({
+      brandName: brand.name || "",
+      supportEmail: brand.email || "",
+      supportPhone: brand.phone || "",
+      whatsappNumber: brand.whatsapp || "",
+      chatWelcome: brand.chatWelcome || "",
+    });
+    // Only clear form errors when the values actually changed from the
+    // server (i.e. not on every keystroke — brandKey is stable then).
+    if (lastBrandKey !== "") setBrandFormErrors({});
+  }
 
   // Per-section feedback messages.
   const [status, setStatus] = useState({});
@@ -178,24 +205,42 @@ export default function Settings() {
 
   const handleChatPrefs = async (event) => {
     event.preventDefault();
-    if (!chatPrefs.chatWelcome.trim()) {
-      setSectionStatus("chat", "error", "The welcome message cannot be empty.");
-      return;
+    const next = {};
+    if (!brandForm.brandName.trim()) {
+      next.brandName = "The brand name is required.";
     }
-    if (chatPrefs.supportEmail && !EMAIL_RE.test(chatPrefs.supportEmail)) {
-      setSectionStatus("chat", "error", "Enter a valid support email.");
-      return;
+    if (!brandForm.chatWelcome.trim()) {
+      next.chatWelcome = "The welcome message cannot be empty.";
     }
+    if (!EMAIL_RE.test(brandForm.supportEmail.trim())) {
+      next.supportEmail = "Enter a valid support email.";
+    }
+    if (!/^[0-9+()\-\s]{6,25}$/.test(brandForm.supportPhone.trim())) {
+      next.supportPhone = "Enter a valid phone number.";
+    }
+    if (brandForm.whatsappNumber.replace(/\D/g, "").length < 8) {
+      next.whatsappNumber =
+        "Use 8 to 15 digits, country code first (e.g. 12125550142).";
+    }
+    setBrandFormErrors(next);
+    if (Object.keys(next).length > 0) return;
 
-    setSavingPrefs("chat");
+    setSavingPrefs("brand");
     try {
-      await updatePreferences({
-        chatWelcome: chatPrefs.chatWelcome.trim(),
-        supportEmail: chatPrefs.supportEmail.trim(),
+      await updateBrand({
+        brandName: brandForm.brandName.trim(),
+        supportEmail: brandForm.supportEmail.trim(),
+        supportPhone: brandForm.supportPhone.trim(),
+        whatsappNumber: brandForm.whatsappNumber.trim(),
+        chatWelcome: brandForm.chatWelcome.trim(),
       });
-      setSectionStatus("chat", "success", "Chat preferences saved.");
+      setSectionStatus(
+        "brand",
+        "success",
+        "Brand & contact settings saved. The whole site uses them right away."
+      );
     } catch (err) {
-      setSectionStatus("chat", "error", err.message || "Could not save.");
+      setSectionStatus("brand", "error", err.message || "Could not save.");
     } finally {
       setSavingPrefs("");
     }
@@ -492,58 +537,135 @@ export default function Settings() {
             </form>
           </section>
 
-          {/* ---------------- Chat preferences ---------------- */}
+          {/* ---------------- Brand & contact ---------------- */}
           <section className="card settings-section">
             <h2>
-              <Icon name="chat" size={18} /> Chat preferences
+              <Icon name="chat" size={18} /> Brand &amp; contact
             </h2>
             <p className="section-help">
-              The welcome message is shown to every visitor in the chat bubble.
-              The support email is used on the website.
+              These values are shown across the whole public site: navbar,
+              footer, contact page, pricing and the chat bubble. They live in
+              the database — no redeploy needed after a change.
             </p>
 
             <form onSubmit={handleChatPrefs} noValidate>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="brand-name">Brand name</label>
+                  <input
+                    id="brand-name"
+                    className={`form-input ${
+                      brandFormErrors.brandName ? "invalid" : ""
+                    }`}
+                    value={brandForm.brandName}
+                    onChange={(event) =>
+                      setBrandForm({
+                        ...brandForm,
+                        brandName: event.target.value,
+                      })
+                    }
+                  />
+                  {brandFormErrors.brandName && (
+                    <p className="field-error">{brandFormErrors.brandName}</p>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="support-phone">Support phone</label>
+                  <input
+                    id="support-phone"
+                    className={`form-input ${
+                      brandFormErrors.supportPhone ? "invalid" : ""
+                    }`}
+                    value={brandForm.supportPhone}
+                    onChange={(event) =>
+                      setBrandForm({
+                        ...brandForm,
+                        supportPhone: event.target.value,
+                      })
+                    }
+                    placeholder="+1 (212) 555-0142"
+                  />
+                  {brandFormErrors.supportPhone && (
+                    <p className="field-error">{brandFormErrors.supportPhone}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="support-email">Support email</label>
+                  <input
+                    id="support-email"
+                    type="email"
+                    className={`form-input ${
+                      brandFormErrors.supportEmail ? "invalid" : ""
+                    }`}
+                    value={brandForm.supportEmail}
+                    onChange={(event) =>
+                      setBrandForm({
+                        ...brandForm,
+                        supportEmail: event.target.value,
+                      })
+                    }
+                    placeholder="support@swifttrack.com"
+                  />
+                  {brandFormErrors.supportEmail && (
+                    <p className="field-error">{brandFormErrors.supportEmail}</p>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="whatsapp-number">WhatsApp number</label>
+                  <input
+                    id="whatsapp-number"
+                    className={`form-input ${
+                      brandFormErrors.whatsappNumber ? "invalid" : ""
+                    }`}
+                    value={brandForm.whatsappNumber}
+                    onChange={(event) =>
+                      setBrandForm({
+                        ...brandForm,
+                        whatsappNumber: event.target.value,
+                      })
+                    }
+                    placeholder="12125550142"
+                  />
+                  {brandFormErrors.whatsappNumber && (
+                    <p className="field-error">
+                      {brandFormErrors.whatsappNumber}
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="form-group">
-                <label htmlFor="chat-welcome">Welcome message</label>
+                <label htmlFor="chat-welcome">Chat welcome message</label>
                 <textarea
                   id="chat-welcome"
                   className="form-input"
                   rows={3}
-                  value={chatPrefs.chatWelcome}
+                  value={brandForm.chatWelcome}
                   onChange={(event) =>
-                    setChatPrefs({
-                      ...chatPrefs,
+                    setBrandForm({
+                      ...brandForm,
                       chatWelcome: event.target.value,
                     })
                   }
                 />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="support-email">Support email</label>
-                <input
-                  id="support-email"
-                  type="email"
-                  className="form-input"
-                  value={chatPrefs.supportEmail}
-                  onChange={(event) =>
-                    setChatPrefs({
-                      ...chatPrefs,
-                      supportEmail: event.target.value,
-                    })
-                  }
-                  placeholder="support@swifttrack.com"
-                />
+                {brandFormErrors.chatWelcome && (
+                  <p className="field-error">{brandFormErrors.chatWelcome}</p>
+                )}
               </div>
 
               <div className="settings-actions">
-                {renderStatus("chat")}
+                {renderStatus("brand")}
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={savingPrefs === "chat"}
+                  disabled={savingPrefs === "brand"}
                 >
-                  {savingPrefs === "chat" ? "Saving…" : "Save chat settings"}
+                  {savingPrefs === "brand" ? "Saving…" : "Save brand settings"}
                 </button>
               </div>
             </form>

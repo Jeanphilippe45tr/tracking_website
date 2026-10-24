@@ -8,7 +8,9 @@ import PageHero from "../components/PageHero";
 import SectionHeading from "../components/SectionHeading";
 import FaqList from "../components/FaqList";
 import Icon from "../components/Icon";
-import { BRAND, IMAGES, OFFICES } from "../data/site";
+import { IMAGES, OFFICES } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
+import { submitContactForm } from "../api/shipments";
 import "../styles/pages.css";
 import "../styles/content.css";
 
@@ -32,18 +34,21 @@ const FAQ = [
   },
 ];
 
-const EMPTY = { name: "", email: "", subject: "", message: "" };
+const EMPTY = { name: "", email: "", subject: "", message: "", "tracking-ref": "" };
 
 export default function Contact() {
+  const brand = useBrand();
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setValues((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (apiError) setApiError("");
     if (sent) setSent(false);
   };
 
@@ -68,20 +73,31 @@ export default function Contact() {
     return next;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const validationErrors = validate();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
-    // No backend yet: simulate a short send with a loading state.
     setLoading(true);
-    setTimeout(() => {
+    setApiError("");
+
+    try {
+      await submitContactForm({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        subject: values.subject.trim(),
+        message: values.message.trim(),
+        trackingNumber: values["tracking-ref"]?.trim() || "",
+      });
       setLoading(false);
       setSent(true);
       setValues(EMPTY);
-    }, 700);
+    } catch (err) {
+      setLoading(false);
+      setApiError(err.message || "Could not send message. Please try again.");
+    }
   };
 
   return (
@@ -97,31 +113,31 @@ export default function Contact() {
       {/* ---------------- QUICK CONTACT ---------------- */}
       <section className="contact-channels">
         <div className="container contact-channels-grid">
-          <a href={`tel:${BRAND.phoneHref}`} className="contact-channel card">
+          <a href={`tel:${brand.phoneHref}`} className="contact-channel card">
             <span className="contact-channel-icon">
               <Icon name="phone" size={22} />
             </span>
             <span>
               <strong>Call us</strong>
-              <small>{BRAND.phone}</small>
+              <small>{brand.phone}</small>
             </span>
           </a>
-          <a href={`mailto:${BRAND.email}`} className="contact-channel card">
+          <a href={`mailto:${brand.email}`} className="contact-channel card">
             <span className="contact-channel-icon">
               <Icon name="mail" size={22} />
             </span>
             <span>
               <strong>Email us</strong>
-              <small>{BRAND.email}</small>
+              <small>{brand.email}</small>
             </span>
           </a>
-          <a href={`https://wa.me/${BRAND.phoneHref.replace(/\D/g, "")}`} className="contact-channel card" target="_blank" rel="noreferrer noopener">
+          <a href={`https://wa.me/${brand.phoneHref.replace(/\D/g, "")}`} className="contact-channel card" target="_blank" rel="noreferrer noopener">
             <span className="contact-channel-icon">
               <Icon name="chat" size={22} />
             </span>
             <span>
               <strong>WhatsApp</strong>
-              <small>{BRAND.whatsapp}</small>
+              <small>{brand.whatsapp}</small>
             </span>
           </a>
           <div className="contact-channel card">
@@ -130,7 +146,7 @@ export default function Contact() {
             </span>
             <span>
               <strong>Opening hours</strong>
-              <small>{BRAND.hours}</small>
+              <small>{brand.hours}</small>
             </span>
           </div>
         </div>
@@ -145,6 +161,12 @@ export default function Contact() {
             {sent && (
               <div className="alert alert-success" role="status">
                 ✅ Thanks! Your message has been sent. We will reply soon.
+              </div>
+            )}
+
+            {apiError && (
+              <div className="alert alert-error" role="alert">
+                {apiError}
               </div>
             )}
 
@@ -235,6 +257,8 @@ export default function Contact() {
                 type="text"
                 className="form-input"
                 placeholder="TRK000000001"
+                value={values["tracking-ref"] || ""}
+                onChange={handleChange}
               />
             </div>
 

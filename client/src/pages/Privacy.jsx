@@ -3,13 +3,13 @@
 // -------------------------------------------------------------------
 
 import LegalLayout from "../components/LegalLayout";
-import { BRAND } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 
-const SECTIONS = [
+const buildSections = (brand) => [
   {
     title: "Who we are",
     paragraphs: [
-      `${BRAND.legalName} is the data controller for the information collected through this website and through our delivery service. Our registered office is at ${BRAND.address}. You can reach our data protection team at ${BRAND.email}.`,
+      `${brand.legalName} is the data controller for the information collected through this website and through our delivery service. Our registered office is at ${brand.address}. You can reach our data protection team at ${brand.email}.`,
     ],
   },
   {
@@ -50,7 +50,7 @@ const SECTIONS = [
       "Under the EU and UK General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA) and other applicable laws, you have the right to see the information we hold about you, to correct it, to ask us to delete it, to limit how we use it, and to receive a copy of it in a portable format.",
     ],
     list: [
-      `Write to ${BRAND.email} with the subject “Data request” and the tracking number or the email address you used.`,
+      `Write to ${brand.email} with the subject “Data request” and the tracking number or the email address you used.`,
       "We answer within thirty days and we never charge for it.",
       "If you are not satisfied with our answer, you can complain to your local data protection authority — for example the ICO in the UK or your EU supervisory authority.",
     ],
@@ -70,13 +70,15 @@ const SECTIONS = [
 ];
 
 export default function Privacy() {
+  const brand = useBrand();
+  const sections = buildSections(brand);
   return (
     <LegalLayout
       eyebrow="Legal"
       title="Privacy policy"
       subtitle="What we collect, why we collect it, and how to get it back or have it deleted."
       updated="22 October 2026"
-      sections={SECTIONS}
+      sections={sections}
     />
   );
 }

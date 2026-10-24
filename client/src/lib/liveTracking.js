@@ -2,16 +2,15 @@
 // Live tracking simulation.
 // -------------------------------------------------------------------
 // Gives the admin a real control panel (start / pause / stop / reset)
-// for a moving parcel. The state lives in localStorage, so the public
-// Live Map page (and even a second browser tab) sees the same movement.
-//
-// The simulation advances by elapsed time rather than by tick count, so
-// it stays accurate even when the tab is throttled in the background.
+// for a moving parcel. In real mode, state is synced with the server
+// via polling. In mock mode, state lives in localStorage.
 // -------------------------------------------------------------------
 
 import { useSyncExternalStore } from "react";
+import { USE_MOCK } from "../api/client";
 import { createPersistentStore } from "./persistentStore";
 import { coordsFor, DEFAULT_CENTER } from "../data/geo";
+import * as liveApi from "../api/live";
 
 // Full route takes this long at 1× speed (2 minutes).
 export const SIM_BASE_DURATION_MS = 120000;
@@ -43,28 +42,109 @@ function initialState() {
   };
 }
 
-export const liveStore = createPersistentStore(
-  "swifttrack.live.v2",
-  initialState
-);
+// Create the appropriate store implementation at module level
+let _liveStoreImpl;
 
+if (USE_MOCK) {
+  // Mock mode: localStorage store
+  _liveStoreImpl = createPersistentStore("swifttrack.live.v2", initialState);
+} else {
+  // Real mode: API-backed store with polling
+  let cache = initialState();
+  const listeners = new Set();
+
+  function emit() {
+    listeners.forEach((listener) => listener());
+  }
+
+  _liveStoreImpl = {
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    getSnapshot() {
+      return cache;
+    },
+    async refresh() {
+      try {
+        const data = await liveApi.getLiveSession();
+        cache = { ...cache, ...data };
+        emit();
+      } catch (err) {
+        console.error("Failed to fetch live session:", err);
+      }
+    },
+    async start(payload) {
+      const data = await liveApi.startLiveSession(payload);
+      cache = { ...cache, ...data };
+      emit();
+    },
+    async pause() {
+      const data = await liveApi.pauseLiveSession();
+      cache = { ...cache, ...data };
+      emit();
+    },
+    async resume() {
+      const data = await liveApi.resumeLiveSession();
+      cache = { ...cache, ...data };
+      emit();
+    },
+    async stop() {
+      const data = await liveApi.stopLiveSession();
+      cache = { ...cache, ...data };
+      emit();
+    },
+    async reset() {
+      const data = await liveApi.resetLiveSession();
+      cache = { ...cache, ...data };
+      emit();
+    },
+    async setSpeed(speed) {
+      const data = await liveApi.setLiveSpeed(speed);
+      cache = { ...cache, ...data };
+      emit();
+    },
+  };
+
+  // Start polling every 2 seconds
+  let pollInterval = null;
+  function startPolling() {
+    if (pollInterval) return;
+    pollInterval = setInterval(() => _liveStoreImpl.refresh(), 2000);
+    _liveStoreImpl.refresh(); // initial fetch
+  }
+  startPolling();
+}
+
+// Export liveStore for mock mode timer access (alias to _liveStoreImpl in mock mode)
+export const liveStore = _liveStoreImpl;
+export const liveStoreImpl = _liveStoreImpl;
+
+// Unified hook - always call useSyncExternalStore in the same order
 export function useLiveTrackingStore() {
   return useSyncExternalStore(
-    liveStore.subscribe,
-    liveStore.getSnapshot,
-    liveStore.getSnapshot
+    liveStoreImpl.subscribe,
+    liveStoreImpl.getSnapshot,
+    liveStoreImpl.getSnapshot
   );
 }
 
 // -------------------------------------------------------------------
-// Geometry helpers
+// Geometry helpers (shared between mock and real modes)
 // -------------------------------------------------------------------
 
 // Build a gentle 3-point curve between two cities so the moving marker
 // does not simply slide along a boring straight line.
-export function buildRoute(origin, destination) {
-  const a = coordsFor(origin) || DEFAULT_CENTER;
-  const b = coordsFor(destination) || DEFAULT_CENTER;
+// When precise coordinates are known (geocoded by the server and stored
+// on the shipment) they win over the static city table.
+export function buildRoute(
+  origin,
+  destination,
+  originCoords = null,
+  destCoords = null
+) {
+  const a = originCoords || coordsFor(origin) || DEFAULT_CENTER;
+  const b = destCoords || coordsFor(destination) || DEFAULT_CENTER;
 
   // Origin and destination are the same city: draw a small loop.
   if (Math.abs(a[0] - b[0]) < 0.0001 && Math.abs(a[1] - b[1]) < 0.0001) {
@@ -170,4 +250,10 @@ export function statusLabelFor(progress) {
   return "Preparing pickup";
 }
 
-export const resetLive = () => liveStore.reset();
+export const resetLive = () => {
+  if (USE_MOCK) {
+    liveStoreImpl.reset();
+  } else {
+    liveStoreImpl.reset();
+  }
+};

@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "./Logo";
 import Icon from "./Icon";
-import { BRAND, SOCIALS, COUNTRIES } from "../data/site";
+import { SOCIALS, COUNTRIES } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
+import { subscribeToNewsletter } from "../api/contactApi";
 import "../styles/layout.css";
 
 const COLUMNS = [
@@ -44,17 +46,27 @@ const COLUMNS = [
 ];
 
 export default function Footer() {
+  const brand = useBrand();
   // The year is calculated so the copyright never goes stale.
   const year = new Date().getFullYear();
 
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [subscribedMessage, setSubscribedMessage] = useState("");
+  const [newsletterError, setNewsletterError] = useState("");
 
-  const handleSubscribe = (event) => {
+  const handleSubscribe = async (event) => {
     event.preventDefault();
+    setNewsletterError("");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return;
-    setSubscribed(true);
-    setEmail("");
+    try {
+      const result = await subscribeToNewsletter(email.trim());
+      setSubscribed(true);
+      setSubscribedMessage(result.message || "You are on the list.");
+      setEmail("");
+    } catch (err) {
+      setNewsletterError(err.message || "Could not subscribe — try again.");
+    }
   };
 
   return (
@@ -91,7 +103,12 @@ export default function Footer() {
             </button>
             {subscribed && (
               <p className="newsletter-ok" role="status">
-                <Icon name="check" size={15} /> You are on the list.
+                <Icon name="check" size={15} /> {subscribedMessage || "You are on the list."}
+              </p>
+            )}
+            {newsletterError && (
+              <p className="newsletter-error" role="alert">
+                {newsletterError}
               </p>
             )}
           </form>
@@ -109,19 +126,19 @@ export default function Footer() {
           <ul className="footer-contact">
             <li>
               <Icon name="phone" size={16} />
-              <a href={`tel:${BRAND.phoneHref}`}>{BRAND.phone}</a>
+              <a href={`tel:${brand.phoneHref}`}>{brand.phone}</a>
             </li>
             <li>
               <Icon name="mail" size={16} />
-              <a href={`mailto:${BRAND.email}`}>{BRAND.email}</a>
+              <a href={`mailto:${brand.email}`}>{brand.email}</a>
             </li>
             <li>
               <Icon name="pin" size={16} />
-              <span>{BRAND.address}</span>
+              <span>{brand.address}</span>
             </li>
             <li>
               <Icon name="clock" size={16} />
-              <span>{BRAND.hours}</span>
+              <span>{brand.hours}</span>
             </li>
           </ul>
 
@@ -176,7 +193,7 @@ export default function Footer() {
 
       {/* ---------------- BOTTOM: legal bar ---------------- */}
       <div className="container footer-bottom">
-        <p>© {year} {BRAND.name}. All rights reserved.</p>
+        <p>© {year} {brand.name}. All rights reserved.</p>
 
         <ul className="footer-legal">
           <li>

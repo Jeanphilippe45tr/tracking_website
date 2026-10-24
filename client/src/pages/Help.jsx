@@ -7,7 +7,8 @@ import { Link } from "react-router-dom";
 import PageHero from "../components/PageHero";
 import SectionHeading from "../components/SectionHeading";
 import Icon from "../components/Icon";
-import { BRAND, FAQ_CATEGORIES, IMAGES } from "../data/site";
+import { FAQ_CATEGORIES, IMAGES } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import "../styles/pages.css";
 import "../styles/content.css";
 
@@ -60,6 +61,7 @@ const GUIDES = [
 ];
 
 export default function Help() {
+  const brand = useBrand();
   const [active, setActive] = useState(FAQ_CATEGORIES[0].id);
   const [query, setQuery] = useState("");
 
@@ -261,13 +263,13 @@ export default function Help() {
               </p>
               <ul>
                 <li>
-                  <Icon name="phone" size={15} /> {BRAND.phone}
+                  <Icon name="phone" size={15} /> {brand.phone}
                 </li>
                 <li>
-                  <Icon name="mail" size={15} /> {BRAND.email}
+                  <Icon name="mail" size={15} /> {brand.email}
                 </li>
                 <li>
-                  <Icon name="chat" size={15} /> WhatsApp — {BRAND.whatsapp}
+                  <Icon name="chat" size={15} /> WhatsApp — {brand.whatsapp}
                 </li>
               </ul>
             </div>

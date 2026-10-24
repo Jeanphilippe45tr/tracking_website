@@ -8,7 +8,8 @@ import PageHero from "../components/PageHero";
 import SectionHeading from "../components/SectionHeading";
 import FaqList from "../components/FaqList";
 import Icon from "../components/Icon";
-import { BRAND, IMAGES, OFFICES } from "../data/site";
+import { IMAGES, OFFICES } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import { submitContactForm } from "../api/shipments";
 import "../styles/pages.css";
 import "../styles/content.css";
@@ -36,6 +37,7 @@ const FAQ = [
 const EMPTY = { name: "", email: "", subject: "", message: "", "tracking-ref": "" };
 
 export default function Contact() {
+  const brand = useBrand();
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
@@ -111,31 +113,31 @@ export default function Contact() {
       {/* ---------------- QUICK CONTACT ---------------- */}
       <section className="contact-channels">
         <div className="container contact-channels-grid">
-          <a href={`tel:${BRAND.phoneHref}`} className="contact-channel card">
+          <a href={`tel:${brand.phoneHref}`} className="contact-channel card">
             <span className="contact-channel-icon">
               <Icon name="phone" size={22} />
             </span>
             <span>
               <strong>Call us</strong>
-              <small>{BRAND.phone}</small>
+              <small>{brand.phone}</small>
             </span>
           </a>
-          <a href={`mailto:${BRAND.email}`} className="contact-channel card">
+          <a href={`mailto:${brand.email}`} className="contact-channel card">
             <span className="contact-channel-icon">
               <Icon name="mail" size={22} />
             </span>
             <span>
               <strong>Email us</strong>
-              <small>{BRAND.email}</small>
+              <small>{brand.email}</small>
             </span>
           </a>
-          <a href={`https://wa.me/${BRAND.phoneHref.replace(/\D/g, "")}`} className="contact-channel card" target="_blank" rel="noreferrer noopener">
+          <a href={`https://wa.me/${brand.phoneHref.replace(/\D/g, "")}`} className="contact-channel card" target="_blank" rel="noreferrer noopener">
             <span className="contact-channel-icon">
               <Icon name="chat" size={22} />
             </span>
             <span>
               <strong>WhatsApp</strong>
-              <small>{BRAND.whatsapp}</small>
+              <small>{brand.whatsapp}</small>
             </span>
           </a>
           <div className="contact-channel card">
@@ -144,7 +146,7 @@ export default function Contact() {
             </span>
             <span>
               <strong>Opening hours</strong>
-              <small>{BRAND.hours}</small>
+              <small>{brand.hours}</small>
             </span>
           </div>
         </div>

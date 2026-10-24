@@ -12,7 +12,6 @@ import FaqList from "../components/FaqList";
 import CtaBand from "../components/CtaBand";
 import Icon from "../components/Icon";
 import {
-  BRAND,
   COUNTRIES,
   FAQ_HOME,
   IMAGES,
@@ -21,10 +20,12 @@ import {
   TRUST_POINTS,
   DEMO_NUMBERS,
 } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import "../styles/pages.css";
 import "../styles/content.css";
 
 export default function Home() {
+  const brand = useBrand();
   return (
     <div className="page">
       {/* ---------------- HERO ---------------- */}
@@ -310,8 +311,8 @@ export default function Home() {
             <Link to="/help" className="btn btn-outline">
               Visit the help centre
             </Link>
-            <a href={`tel:${BRAND.phoneHref}`} className="btn btn-primary">
-              <Icon name="phone" size={16} /> {BRAND.phone}
+            <a href={`tel:${brand.phoneHref}`} className="btn btn-primary">
+              <Icon name="phone" size={16} /> {brand.phone}
             </a>
           </div>
         </div>

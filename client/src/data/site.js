@@ -21,20 +21,16 @@ export const img = (id, w = 1200, h = 800, extra = "") =>
 // -------------------------------------------------------------------
 // Brand + contact details
 // -------------------------------------------------------------------
-// The brand keys can be overridden from client/.env — see .env.example.
-// The values below are the built-in defaults.
-const env = import.meta.env;
-
+// DEFAULT values only. The live values are managed by the admin in the
+// Settings page and loaded via the SettingsProvider (PATCH /api/settings).
 export const BRAND = {
-  name: env.VITE_BRAND_NAME || "SwiftTrack",
+  name: "SwiftTrack",
   legalName: "SwiftTrack Logistics Inc.",
   tagline: "Global parcel tracking across the US, Europe and Asia",
-  email: env.VITE_SUPPORT_EMAIL || "support@swifttrack.com",
-  phone: env.VITE_SUPPORT_PHONE || "+1 (212) 555-0142",
-  phoneHref: (env.VITE_SUPPORT_PHONE || "+1 (212) 555-0142").replace(/\s/g, ""),
-  whatsapp: env.VITE_WHATSAPP_NUMBER
-    ? `+${String(env.VITE_WHATSAPP_NUMBER).replace(/^\+/, "")}`
-    : "+1 (212) 555-0142",
+  email: "support@swifttrack.com",
+  phone: "+1 (212) 555-0142",
+  phoneHref: "+1 (212) 555-0142".replace(/\s/g, ""),
+  whatsapp: "+1 (212) 555-0142",
   address: "350 Fifth Avenue, Suite 4200, New York, NY 10118, USA",
   hours: "Every day · 08:00 – 20:00 ET",
   founded: 2014,

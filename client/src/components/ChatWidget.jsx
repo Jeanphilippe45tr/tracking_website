@@ -16,7 +16,7 @@ import {
   useVisitor,
   saveVisitor,
 } from "../lib/chat";
-import { useAdminAccount } from "../lib/adminAccount";
+import { useBrand } from "../context/SettingsContext";
 import { formatChatTime } from "../utils/format";
 import Icon from "./Icon";
 import "../styles/chat.css";
@@ -30,8 +30,8 @@ const SUGGESTIONS = [
 export default function ChatWidget() {
   const chatState = useChatStore();
   const visitor = useVisitor();
-  const account = useAdminAccount();
-  const prefs = account?.prefs || {};
+  const brand = useBrand();
+  const prefs = { chatWelcome: brand.chatWelcome };
 
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");

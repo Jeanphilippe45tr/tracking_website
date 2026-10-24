@@ -7,25 +7,27 @@
 
 import { Link } from "react-router-dom";
 import Icon from "./Icon";
-import { BRAND, NAV } from "../data/site";
+import { NAV } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import "../styles/layout.css";
 
 export default function TopBar() {
+  const brand = useBrand();
   return (
     <div className="topbar">
       <div className="container topbar-inner">
         <ul className="topbar-info">
           <li>
             <Icon name="phone" size={15} />
-            <a href={`tel:${BRAND.phoneHref}`}>{BRAND.phone}</a>
+            <a href={`tel:${brand.phoneHref}`}>{brand.phone}</a>
           </li>
           <li className="topbar-hide-sm">
             <Icon name="mail" size={15} />
-            <a href={`mailto:${BRAND.email}`}>{BRAND.email}</a>
+            <a href={`mailto:${brand.email}`}>{brand.email}</a>
           </li>
           <li className="topbar-hide-md">
             <Icon name="clock" size={15} />
-            <span>{BRAND.hours}</span>
+            <span>{brand.hours}</span>
           </li>
         </ul>
 

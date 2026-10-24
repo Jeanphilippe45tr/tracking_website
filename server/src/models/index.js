@@ -136,6 +136,24 @@ const LiveSession = sequelize.define(
 );
 
 // -------------------------------------------------------------------
+// Site settings (singleton) — brand/contact details editable by the
+// admin in the platform Settings page. Consumed publicly by the site.
+// -------------------------------------------------------------------
+
+const SiteSetting = sequelize.define(
+  "SiteSetting",
+  {
+    id: { type: DataTypes.INTEGER, primaryKey: true, defaultValue: 1 },
+    brandName: { type: DataTypes.STRING, allowNull: false },
+    supportEmail: { type: DataTypes.STRING, allowNull: false },
+    supportPhone: { type: DataTypes.STRING, allowNull: false },
+    whatsappNumber: { type: DataTypes.STRING, allowNull: false },
+    chatWelcome: { type: DataTypes.TEXT, allowNull: false },
+  },
+  { timestamps: true, createdAt: false, updatedAt: "updatedAt" }
+);
+
+// -------------------------------------------------------------------
 // Exports
 // -------------------------------------------------------------------
 
@@ -149,4 +167,5 @@ module.exports = {
   Message,
   ContactMessage,
   LiveSession,
+  SiteSetting,
 };

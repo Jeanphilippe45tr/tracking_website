@@ -1,6 +1,6 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { AdminUser } = require("../models");
+const { AdminUser, SiteSetting } = require("../models");
 const { requireAuth, signToken, toPublicUser, defaultPrefs } = require("../middleware/auth");
 const { EMAIL_RE } = require("../utils/helpers");
 
@@ -149,6 +149,30 @@ router.patch("/preferences", requireAuth, async (req, res) => {
 
     user.prefs = { ...current, ...patch };
     await user.save();
+
+    // chatWelcome / supportEmail are displayed site-wide, so keep the
+    // public site-settings singleton in sync with these values too.
+    const siteSync = {};
+    if (patch.chatWelcome !== undefined) siteSync.chatWelcome = patch.chatWelcome;
+    if (patch.supportEmail !== undefined) siteSync.supportEmail = patch.supportEmail;
+    if (Object.keys(siteSync).length > 0) {
+      let site = await SiteSetting.findByPk(1);
+      if (!site) {
+        site = await SiteSetting.create({
+          id: 1,
+          brandName: process.env.BRAND_NAME || "SwiftTrack",
+          supportEmail: "support@swifttrack.com",
+          supportPhone: process.env.SUPPORT_PHONE || "+1 (212) 555-0142",
+          whatsappNumber: process.env.WHATSAPP_NUMBER || "+12125550142",
+          chatWelcome:
+            "Hi! You are chatting with the SwiftTrack team. Tell us your tracking number and how we can help — a human replies here in a few minutes.",
+        });
+      }
+      for (const [key, value] of Object.entries(siteSync)) {
+        site[key] = String(value).trim() || site[key];
+      }
+      await site.save();
+    }
 
     return res.json(user.prefs);
   } catch (err) {

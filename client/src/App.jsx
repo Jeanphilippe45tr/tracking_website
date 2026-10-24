@@ -9,6 +9,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LiveTrackingProvider } from "./context/LiveTrackingContext";
+import { SettingsProvider } from "./context/SettingsContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -73,7 +74,8 @@ export default function App() {
       {/* The simulation clock runs globally, so an active delivery keeps
           moving while the admin browses other pages or opens /live. */}
       <LiveTrackingProvider>
-        <ScrollToTop />
+        <SettingsProvider>
+          <ScrollToTop />
         <Routes>
           {/* ---------------- Public routes ---------------- */}
           <Route
@@ -258,6 +260,7 @@ export default function App() {
             }
           />
         </Routes>
+        </SettingsProvider>
       </LiveTrackingProvider>
     </AuthProvider>
   );

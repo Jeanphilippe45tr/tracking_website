@@ -8,7 +8,8 @@ import SectionHeading from "../components/SectionHeading";
 import CarrierStrip from "../components/CarrierStrip";
 import CtaBand from "../components/CtaBand";
 import Icon from "../components/Icon";
-import { BRAND, IMAGES, MILESTONES, OFFICES } from "../data/site";
+import { IMAGES, MILESTONES, OFFICES } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import "../styles/pages.css";
 import "../styles/content.css";
 
@@ -63,6 +64,7 @@ const TEAM = [
 ];
 
 export default function About() {
+  const brand = useBrand();
   return (
     <div className="page">
       <PageHero
@@ -82,7 +84,7 @@ export default function About() {
               loading="lazy"
             />
             <div className="why-media-card">
-              <span className="why-media-value">{BRAND.founded}</span>
+              <span className="why-media-value">{brand.founded}</span>
               <span className="why-media-label">
                 founded in Brooklyn,
                 <br />

@@ -18,6 +18,7 @@ app.use("/api/shipments", require("./routes/shipments"));
 app.use("/api/relay-points", require("./routes/relayPoints"));
 app.use("/api/chat", require("./routes/chat"));
 app.use("/api/live", require("./routes/live"));
+app.use("/api/settings", require("./routes/settings"));
 app.use("/api/contact", require("./routes/contact"));
 
 // Unknown /api route → JSON 404 (the client shows the .error message).

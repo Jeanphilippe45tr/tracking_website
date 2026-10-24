@@ -105,6 +105,10 @@ sequelize
   .sync()
   .then(async () => {
     console.log("Database connected");
+    // Sync creates missing tables; ensureSchema adds columns that were
+    // introduced after an existing table was created (see migrate.js).
+    const { ensureSchema } = require("./migrate");
+    await ensureSchema();
     await seed();
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })

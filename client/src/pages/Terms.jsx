@@ -3,13 +3,14 @@
 // -------------------------------------------------------------------
 
 import LegalLayout from "../components/LegalLayout";
-import { BRAND } from "../data/site";
 
-const SECTIONS = [
+import { useBrand } from "../context/SettingsContext";
+
+const buildSections = (brand) => [
   {
     title: "About these terms",
     paragraphs: [
-      `These terms apply to anyone using the ${BRAND.name} website, the public tracking pages and any parcel we carry on behalf of a sender or a recipient. By using the site you accept them. If you do not accept them, please stop using the site.`,
+      `These terms apply to anyone using the ${brand.name} website, the public tracking pages and any parcel we carry on behalf of a sender or a recipient. By using the site you accept them. If you do not accept them, please stop using the site.`,
       "The service itself is provided by SwiftTrack Logistics Inc., registered in Delaware, USA. Our principal office is at 350 Fifth Avenue, Suite 4200, New York, NY 10118.",
     ],
   },
@@ -68,19 +69,21 @@ const SECTIONS = [
     title: "Changes and contact",
     paragraphs: [
       "We may update these terms from time to time. The date at the top of this page shows the last revision, and the new version applies as soon as it is published.",
-      `Questions about these terms? Write to us at ${BRAND.email} or call ${BRAND.phone}.`,
+      `Questions about these terms? Write to us at ${brand.email} or call ${brand.phone}.`,
     ],
   },
 ];
 
 export default function Terms() {
+  const brand = useBrand();
+  const sections = buildSections(brand);
   return (
     <LegalLayout
       eyebrow="Legal"
       title="Terms & conditions"
       subtitle="The rules that apply when you use SwiftTrack — our website and our delivery service."
       updated="22 October 2026"
-      sections={SECTIONS}
+      sections={sections}
     />
   );
 }

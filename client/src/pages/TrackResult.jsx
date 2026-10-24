@@ -18,7 +18,7 @@ import MapView from "../components/MapView";
 import Icon from "../components/Icon";
 import { formatDateTime } from "../utils/format";
 import { coordsFor, DEFAULT_CENTER } from "../data/geo";
-import { BRAND } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import "../styles/pages.css";
 import "../styles/content.css";
 import "../styles/live.css";
@@ -47,6 +47,7 @@ function estimateDelivery(shipment) {
 export default function TrackResult() {
   const { trackingNumber } = useParams();
   const live = useLiveTracking();
+  const brand = useBrand();
 
   const [shipment, setShipment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -413,8 +414,8 @@ export default function TrackResult() {
             <Link to="/contact" className="btn btn-primary">
               <Icon name="chat" size={16} /> Contact support
             </Link>
-            <a href={`tel:${BRAND.phoneHref}`} className="btn btn-outline">
-              <Icon name="phone" size={16} /> {BRAND.phone}
+            <a href={`tel:${brand.phoneHref}`} className="btn btn-outline">
+              <Icon name="phone" size={16} /> {brand.phone}
             </a>
           </div>
         </div>

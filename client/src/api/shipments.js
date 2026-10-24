@@ -173,5 +173,17 @@ export async function getRelayPoints(query = "") {
   return data;
 }
 
+// --- POST /api/contact (PUBLIC) --------------------------------------
+// Submits a contact form.
+export async function submitContactForm(payload) {
+  if (USE_MOCK) {
+    await delay(600);
+    return { ok: true, id: `mock-${Date.now()}` };
+  }
+
+  const { data } = await apiClient.post("/contact", payload);
+  return data;
+}
+
 // Exported for convenience so components can build status <select>s.
 export { STATUSES };

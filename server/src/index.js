@@ -16,18 +16,32 @@ const app = express();
 app.use(helmet());
 
 // CORS allow-list — ALLOWED_ORIGIN is a comma-separated list of the
-// exact origins allowed to call the API (the deployed Netlify/Render
-// frontend). Unset (local dev) = open to all origins.
+// exact origins allowed to call the API (the deployed Vercel frontend).
+// Values are normalized (trim, lowercase, no trailing slash, no scheme
+// typos) so "https://x.vercel.app/" or " https://x.vercel.app" and the
+// copy-pasted-with-slash variant all work. Unset (local dev) = allow all.
 const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
   .split(",")
-  .map((s) => s.trim())
+  .map((s) => s.trim().replace(/^['"]|['"]$/g, "").replace(/\/+$/, "").toLowerCase())
   .filter(Boolean);
+
+function normalizeOrigin(origin) {
+  return String(origin || "")
+    .trim()
+    .replace(/\/+$/, "")
+    .toLowerCase();
+}
+
 if (allowedOrigins.length > 0) {
   app.use(
     cors({
       origin(origin, cb) {
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-        return cb(new Error(`Origin ${origin} not allowed by CORS`));
+        // `!origin` covers same-origin/service-to-service calls (curl,
+        // health checks) — allowed with no ACAO header needed.
+        if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
+          return cb(null, true);
+        }
+        return cb(null, false); // deny silently, no headers set
       },
     })
   );

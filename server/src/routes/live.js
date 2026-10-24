@@ -61,6 +61,8 @@ function serialize(session) {
     route: s.route || [],
     progress: Number(s.progress) || 0,
     speed: Number(s.speed) || 1,
+    suggestedSpeed: Number(s.suggestedSpeed) || 0,
+    distanceKm: Number(s.distanceKm) || 0,
     statusLabel: s.status === "idle" ? "Idle" : statusLabelFor(s.progress),
     startedAt: s.startedAt,
     updatedAt: s.updatedAt,
@@ -143,6 +145,11 @@ router.get("/", async (req, res) => {
 });
 
 // --- POST /api/live/start {trackNumber, shipmentId, origin, destination, speed}
+// origin/destination can be full street addresses ("324 N 1st Ave,
+// Fairview, Oklahoma, 73737") — they are geocoded and the parcel then
+// follows the real road route between the two exact points. `speed` is
+// optional: when omitted, a realistic speed is derived from the route
+// distance and the admin can still override it live at any moment.
 router.post("/start", requireAuth, async (req, res) => {
   try {
     const { trackNumber, shipmentId, origin, destination } = req.body ?? {};
@@ -153,8 +160,7 @@ router.post("/start", requireAuth, async (req, res) => {
         .json({ error: "Origin and destination are required." });
     }
 
-    const speedRaw = Number(req.body?.speed);
-    const speed = clamp(Number.isFinite(speedRaw) && speedRaw > 0 ? speedRaw : 0.5, 0.5, 20);
+    const route = await buildRoute(origin, destination);
 
     const session = await getSession();
     session.set({
@@ -163,11 +169,17 @@ router.post("/start", requireAuth, async (req, res) => {
       shipmentId: shipmentId ?? null,
       origin: String(origin).trim(),
       destination: String(destination).trim(),
-      route: buildRoute(session.origin, session.destination),
+      route: route.points,
+      distanceKm: route.distanceKm,
+      suggestedSpeed: route.suggestedSpeed,
       progress: 0,
       baseProgress: 0,
       baseAt: new Date(),
-      speed,
+      speed: clamp(
+        Number(req.body?.speed) || route.suggestedSpeed,
+        0.5,
+        20
+      ),
       startedAt: new Date(),
     });
     await session.save();
@@ -238,6 +250,8 @@ router.post("/reset", requireAuth, async (req, res) => {
       origin: "",
       destination: "",
       route: [],
+      distanceKm: 0,
+      suggestedSpeed: 0,
       progress: 0,
       baseProgress: 0,
       baseAt: null,

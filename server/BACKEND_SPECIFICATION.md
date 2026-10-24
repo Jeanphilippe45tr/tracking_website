@@ -312,12 +312,14 @@ real time.
   "status": "idle" | "running" | "paused" | "stopped" | "completed",
   "trackNumber": "TRK000000001",
   "shipmentId": 1,
-  "origin": "New York",
-  "destination": "Boston",
-  "route": [[lat,lng], [lat,lng], [lat,lng]],  // 3-point curve origin→dest
-  "progress": 0.42,                            // 0..1
-  "speed": 2,                                  // 0.5..20, options 1/2/5/10
-  "statusLabel": "In transit",                 // derived from progress
+  "origin": "324 N 1st Ave, Fairview, Oklahoma 73737",
+  "destination": "8th Ave, Oklahoma City, Oklahoma 73101",
+  "route": [[lat,lng], ...],         // real-road polyline (OSRM) or 3-point curve fallback
+  "progress": 0.42,                  // 0..1
+  "speed": 2,                        // 0.5..20, options 1/2/5/10
+  "suggestedSpeed": 0.9,             // realistic speed derived from route distance
+  "distanceKm": 158.2,               // plotted route length
+  "statusLabel": "In transit",       // derived from progress
   "startedAt": "<ISO>",
   "updatedAt": "<ISO>"
 }
@@ -332,7 +334,16 @@ Key behaviors to replicate server-side:
 - At `progress ≥ 1` → `status = "completed"`, label "Delivered".
 - **Only one active session** at a time globally (all tabs share one state).
 - Starting is done by the admin with `{trackNumber, shipmentId, origin,
-  destination, speed}`; the route is the origin→destination polyline.
+  destination, speed}`. origin/destination may be **full street addresses**
+  (incl. postcode): they are geocoded via Nominatim (cached in `GeoCache`),
+  then a real road route is fetched from OSRM; both fall back to the
+  built-in city table + a gentle curve when offline. Shipment rows store
+  the resolved `originLat/originLng/destinationLat/destinationLng` so the
+  tracking page plots the exact points.
+- `speed` is optional on start: when omitted (or `"auto"`), the server
+  derives a **realistic speed** from the route distance
+  (~75 km ≈ 2×; clamped 0.5–20). The admin can override it at any time
+  with `/live/speed`.
 
 ### 6.2 Suggested endpoints (or equivalent WebSocket / Socket. IO)
 

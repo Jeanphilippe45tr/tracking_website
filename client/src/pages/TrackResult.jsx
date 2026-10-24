@@ -236,8 +236,17 @@ export default function TrackResult() {
       live.route.length > 0 && live.trackNumber === shipment.trackingNumber;
 
     const points = [];
-    const origin = coordsFor(shipment.origin);
-    const destination = coordsFor(shipment.destination);
+    // Precise coordinates when the geocoder resolved the full address;
+    // fall back to the built-in city table (and ultimately the default
+    // center) for plain city names / offline data.
+    const origin =
+      shipment.originLat != null
+        ? [shipment.originLat, shipment.originLng]
+        : coordsFor(shipment.origin);
+    const destination =
+      shipment.destinationLat != null
+        ? [shipment.destinationLat, shipment.destinationLng]
+        : coordsFor(shipment.destination);
 
     if (origin) {
       points.push({

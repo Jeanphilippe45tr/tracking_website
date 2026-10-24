@@ -135,9 +135,16 @@ export function useLiveTrackingStore() {
 
 // Build a gentle 3-point curve between two cities so the moving marker
 // does not simply slide along a boring straight line.
-export function buildRoute(origin, destination) {
-  const a = coordsFor(origin) || DEFAULT_CENTER;
-  const b = coordsFor(destination) || DEFAULT_CENTER;
+// When precise coordinates are known (geocoded by the server and stored
+// on the shipment) they win over the static city table.
+export function buildRoute(
+  origin,
+  destination,
+  originCoords = null,
+  destCoords = null
+) {
+  const a = originCoords || coordsFor(origin) || DEFAULT_CENTER;
+  const b = destCoords || coordsFor(destination) || DEFAULT_CENTER;
 
   // Origin and destination are the same city: draw a small loop.
   if (Math.abs(a[0] - b[0]) < 0.0001 && Math.abs(a[1] - b[1]) < 0.0001) {

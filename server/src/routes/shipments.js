@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const { Shipment, ShipmentEvent, Subscription } = require("../models");
 const { requireAuth } = require("../middleware/auth");
 const { STATUSES, PHONE_RE } = require("../utils/helpers");
+const { geocode } = require("../geo");
 const mailer = require("../mailer");
 
 const router = express.Router();
@@ -47,9 +48,26 @@ function allowedNext(status) {
   return FORWARD[status] || [];
 }
 
-// Exported so the live simulation (routes/live.js) can reuse the same
-// rules when it completes a run.
-// Best-effort email to every subscriber of this shipment.
+// Resolve precise coordinates from the addresses and store them on the
+// shipment. Best-effort: a geocoding failure never blocks the request.
+// Requests run sequentially to respect Nominatim's 1 req/sec policy.
+async function attachCoords(shipment, origin, destination) {
+  try {
+    const originPt = await geocode(origin);
+    const destinationPt = await geocode(destination);
+    await shipment.set({
+      originLat: originPt ? originPt.lat : null,
+      originLng: originPt ? originPt.lng : null,
+      destinationLat: destinationPt ? destinationPt.lat : null,
+      destinationLng: destinationPt ? destinationPt.lng : null,
+    });
+    await shipment.save();
+  } catch (err) {
+    console.error("[attachCoords]", err.message);
+  }
+}
+
+// --- Shared status-transition helper --------------------------------
 async function notifySubscribers(shipment, event) {
   try {
     const subs = await Subscription.findAll({
@@ -71,8 +89,6 @@ async function notifySubscribers(shipment, event) {
     console.error("[notifySubscribers]", err.message);
   }
 }
-
-exports.notifySubscribers = notifySubscribers;
 
 // -------------------------------------------------------------------
 // ADMIN endpoints
@@ -163,6 +179,10 @@ router.post("/", requireAuth, async (req, res) => {
         // Collision on trackingNumber — retry with a new code.
       }
     }
+
+    // Resolve precise coordinates from the addresses (full street
+    // addresses work — "324 N 1st Ave, Fairview, Oklahoma, 73737").
+    await attachCoords(shipment, shipment.origin, shipment.destination);
 
     await ShipmentEvent.create({
       shipmentId: shipment.id,
@@ -286,8 +306,20 @@ router.patch("/:trackingNumber", requireAuth, async (req, res) => {
       updates.carrier = String(updates.carrier).trim() || null;
     }
 
+    const prevOrigin = shipment.origin;
+    const prevDestination = shipment.destination;
     await shipment.update(updates);
     await shipment.save();
+
+    // Route changed → re-resolve the coordinates for the map.
+    if (updates.origin !== undefined && updates.origin !== prevOrigin) {
+      await attachCoords(shipment, updates.origin, shipment.destination);
+    } else if (
+      updates.destination !== undefined &&
+      updates.destination !== prevDestination
+    ) {
+      await attachCoords(shipment, shipment.origin, updates.destination);
+    }
 
     const fresh = await loadShipment(shipment.trackingNumber);
     res.json(serializeShipment(fresh));

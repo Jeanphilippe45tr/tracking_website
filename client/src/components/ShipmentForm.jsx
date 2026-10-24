@@ -128,12 +128,22 @@ export default function ShipmentForm({ onCreated }) {
       )}
 
       <div className="form-grid">
+        {field(
+          "Origin address",
+          "origin",
+          "text",
+          "Full address or city, e.g. 324 N 1st Ave, Fairview, Oklahoma 73737"
+        )}
+        {field(
+          "Destination address",
+          "destination",
+          "text",
+          "Full address or city, e.g. 5th Ave, New York, 10001"
+        )}
         {field("Sender name", "senderName", "text", "e.g. Jordan")}
         {field("Receiver name", "receiverName", "text", "e.g. Maya")}
         {field("Receiver phone", "receiverPhone", "tel", "+1 (555) 000-0000")}
         {field("Weight (kg)", "weight", "number", "2.5")}
-        {field("Origin city", "origin", "text", "e.g. New York")}
-        {field("Destination city", "destination", "text", "e.g. London")}
       </div>
 
       <div className="form-grid">

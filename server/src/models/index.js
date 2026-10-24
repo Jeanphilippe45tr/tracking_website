@@ -28,6 +28,13 @@ const Shipment = sequelize.define(
     carrier: { type: DataTypes.STRING, allowNull: true },
     cost: { type: DataTypes.FLOAT, allowNull: true },
     scheduledDeliveryAt: { type: DataTypes.DATE, allowNull: true },
+    // Precise coordinates resolved from the full addresses (can be null
+    // when the geocoder could not resolve them; the client then falls
+    // back to its city table).
+    originLat: { type: DataTypes.FLOAT, allowNull: true },
+    originLng: { type: DataTypes.FLOAT, allowNull: true },
+    destinationLat: { type: DataTypes.FLOAT, allowNull: true },
+    destinationLng: { type: DataTypes.FLOAT, allowNull: true },
   },
   { underscored: false }
 );
@@ -142,6 +149,16 @@ const NewsletterSubscriber = sequelize.define("NewsletterSubscriber", {
 });
 
 // -------------------------------------------------------------------
+// Geocode cache: free-text addresses -> coordinates, and address-pair
+// -> OSRM road route. Blocks repeated outbound lookups.
+// -------------------------------------------------------------------
+
+const GeoCache = sequelize.define("GeoCache", {
+  key: { type: DataTypes.STRING, primaryKey: true },
+  data: { type: DataTypes.JSON, allowNull: false },
+});
+
+// -------------------------------------------------------------------
 // Live-tracking simulation session (a single global run)
 // -------------------------------------------------------------------
 
@@ -157,6 +174,10 @@ const LiveSession = sequelize.define(
     destination: { type: DataTypes.STRING, defaultValue: "" },
     // Polyline origin -> destination, used by the map widgets.
     route: { type: DataTypes.JSON, defaultValue: [] },
+    // Distance of the plotted route in km (0 when unknown) and the
+    // "realistic" suggested animation speed derived from it.
+    distanceKm: { type: DataTypes.FLOAT, defaultValue: 0 },
+    suggestedSpeed: { type: DataTypes.FLOAT, defaultValue: 0 },
     progress: { type: DataTypes.FLOAT, defaultValue: 0 }, // 0..1
     // Progress computation base: progress at baseAt + elapsed * speed / BASE
     baseProgress: { type: DataTypes.FLOAT, defaultValue: 0 },
@@ -200,6 +221,7 @@ module.exports = {
   ContactMessage,
   Subscription,
   NewsletterSubscriber,
+  GeoCache,
   LiveSession,
   SiteSetting,
 };

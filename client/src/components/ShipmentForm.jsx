@@ -18,6 +18,10 @@ const EMPTY = {
   destination: "",
   weight: "",
   description: "",
+  serviceLevel: "standard",
+  carrier: "",
+  cost: "",
+  scheduledDeliveryAt: "",
 };
 
 export default function ShipmentForm({ onCreated }) {
@@ -77,6 +81,8 @@ export default function ShipmentForm({ onCreated }) {
       const shipment = await createShipment({
         ...values,
         weight: Number(values.weight),
+        cost: values.cost === "" ? null : Number(values.cost),
+        scheduledDeliveryAt: values.scheduledDeliveryAt || null,
       });
       setValues(EMPTY); // reset the form
       onCreated?.(shipment); // tell the parent (show tracking number)
@@ -97,11 +103,11 @@ export default function ShipmentForm({ onCreated }) {
         type={type}
         className={`form-input ${errors[name] ? "invalid" : ""}`}
         placeholder={placeholder}
-        value={values[name]}
+        value={values[name] ?? ""}
         onChange={handleChange}
         aria-invalid={Boolean(errors[name])}
         aria-describedby={errors[name] ? `${name}-error` : undefined}
-        // weight needs to allow decimals
+        // weight/cost need to allow decimals
         step={type === "number" ? "0.1" : undefined}
         min={type === "number" ? "0.1" : undefined}
       />
@@ -128,6 +134,35 @@ export default function ShipmentForm({ onCreated }) {
         {field("Weight (kg)", "weight", "number", "2.5")}
         {field("Origin city", "origin", "text", "e.g. New York")}
         {field("Destination city", "destination", "text", "e.g. London")}
+      </div>
+
+      <div className="form-grid">
+        <div className="form-group">
+          <label htmlFor="serviceLevel">Service level</label>
+          <select
+            id="serviceLevel"
+            name="serviceLevel"
+            className="form-input"
+            value={values.serviceLevel}
+            onChange={handleChange}
+          >
+            <option value="standard">Standard (2–3 business days)</option>
+            <option value="express">Express (next business day)</option>
+          </select>
+        </div>
+        {field("Carrier (optional)", "carrier", "text", "e.g. DHL")}
+        {field("Cost (optional)", "cost", "number", "e.g. 24.50")}
+        <div className="form-group">
+          <label htmlFor="scheduledDeliveryAt">Delivery estimate (optional)</label>
+          <input
+            id="scheduledDeliveryAt"
+            name="scheduledDeliveryAt"
+            type="date"
+            className="form-input"
+            value={values.scheduledDeliveryAt}
+            onChange={handleChange}
+          />
+        </div>
       </div>
 
       <div className="form-group">

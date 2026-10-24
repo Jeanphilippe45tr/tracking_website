@@ -32,6 +32,33 @@ function makeIcon(color, isActive, isLive) {
   });
 }
 
+// Leaflet popups render raw HTML: escape every text field so admin- or
+// user-supplied strings (event titles, relay hours, …) cannot inject
+// markup into the page.
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => {
+    switch (ch) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
+}
+
+function popupHtml(point) {
+  const base = `<strong>${escapeHtml(point.title)}</strong>`;
+  const subtitle = point.subtitle ? `<br/>${escapeHtml(point.subtitle)}` : "";
+  const hours = point.hours ? `<br/><em>${escapeHtml(point.hours)}</em>` : "";
+  return base + subtitle + hours;
+}
+
 export default function MapView({
   points = [],
   route = null,
@@ -129,11 +156,7 @@ export default function MapView({
         title: point.title,
       }).addTo(map);
 
-      marker.bindPopup(
-        `<strong>${point.title}</strong>` +
-          (point.subtitle ? `<br/>${point.subtitle}` : "") +
-          (point.hours ? `<br/><em>${point.hours}</em>` : "")
-      );
+      marker.bindPopup(popupHtml(point));
 
       bounds.push([point.lat, point.lng]);
     });

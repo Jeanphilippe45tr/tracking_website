@@ -9,7 +9,7 @@ const Shipment = sequelize.define(
   "Shipment",
   {
     trackingNumber: {
-      type: DataTypes.STRING(32), // Increased from 12 to 32 characters
+      type: DataTypes.STRING(12),
       unique: true,
       allowNull: false,
     },
@@ -21,6 +21,13 @@ const Shipment = sequelize.define(
     weight: { type: DataTypes.FLOAT, allowNull: false },
     description: { type: DataTypes.STRING, defaultValue: "" },
     status: { type: DataTypes.STRING, defaultValue: "Created" },
+    // Service level: "express" or "standard"
+    serviceLevel: { type: DataTypes.STRING, defaultValue: "standard" },
+    // Optional enrichment (admin-editable). The tracking page shows the
+    // real carrier when set instead of its demo placeholder.
+    carrier: { type: DataTypes.STRING, allowNull: true },
+    cost: { type: DataTypes.FLOAT, allowNull: true },
+    scheduledDeliveryAt: { type: DataTypes.DATE, allowNull: true },
   },
   { underscored: false }
 );
@@ -29,6 +36,8 @@ const ShipmentEvent = sequelize.define("ShipmentEvent", {
   status: { type: DataTypes.STRING, allowNull: false },
   location: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.STRING, defaultValue: "" },
+  // Audit: which admin recorded this scan (name only).
+  createdBy: { type: DataTypes.STRING, allowNull: true },
 });
 
 Shipment.hasMany(ShipmentEvent, { as: "events", foreignKey: "shipmentId" });
@@ -45,6 +54,9 @@ const AdminUser = sequelize.define("AdminUser", {
   passwordHash: { type: DataTypes.STRING, allowNull: false },
   role: { type: DataTypes.STRING, defaultValue: "admin" },
   passwordChangedAt: { type: DataTypes.DATE, allowNull: true },
+  // Bumped on every password change; tokens embed the version so old
+  // sessions die immediately.
+  tokenVersion: { type: DataTypes.INTEGER, defaultValue: 0 },
   prefs: {
     // { chatWelcome, supportEmail, notifyNewMessages, notifyStatusChanges, defaultSpeed }
     type: DataTypes.JSON,
@@ -107,6 +119,26 @@ const ContactMessage = sequelize.define("ContactMessage", {
   subject: { type: DataTypes.STRING, allowNull: false },
   message: { type: DataTypes.TEXT, allowNull: false },
   trackingNumber: { type: DataTypes.STRING, allowNull: true },
+  read: { type: DataTypes.BOOLEAN, defaultValue: false },
+});
+
+// -------------------------------------------------------------------
+// Status-update subscriptions ("Notify me about this parcel")
+// -------------------------------------------------------------------
+
+const Subscription = sequelize.define("Subscription", {
+  shipmentId: { type: DataTypes.INTEGER, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false },
+  active: { type: DataTypes.BOOLEAN, defaultValue: true },
+  unsubscribeToken: { type: DataTypes.STRING, unique: true, allowNull: false },
+});
+
+// -------------------------------------------------------------------
+// Newsletter subscribers
+// -------------------------------------------------------------------
+
+const NewsletterSubscriber = sequelize.define("NewsletterSubscriber", {
+  email: { type: DataTypes.STRING, unique: true, allowNull: false },
 });
 
 // -------------------------------------------------------------------
@@ -166,6 +198,8 @@ module.exports = {
   Conversation,
   Message,
   ContactMessage,
+  Subscription,
+  NewsletterSubscriber,
   LiveSession,
   SiteSetting,
 };

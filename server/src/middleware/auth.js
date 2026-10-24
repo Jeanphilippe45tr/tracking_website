@@ -4,10 +4,16 @@ const { AdminUser } = require("../models");
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 
 // Signs a standard auth token. 7 days keeps the admin session usable
-// while still expiring eventually.
+// while still expiring eventually. The token embeds the admin's
+// tokenVersion so changing the password invalidates old tokens.
 function signToken(user) {
   return jwt.sign(
-    { sub: user.id, email: user.email, role: user.role },
+    {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      ver: user.tokenVersion ?? 0,
+    },
     JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -27,6 +33,11 @@ async function requireAuth(req, res, next) {
     const user = await AdminUser.findByPk(payload.sub);
     if (!user) {
       return res.status(401).json({ error: "Session is no longer valid." });
+    }
+    if ((user.tokenVersion ?? 0) !== (payload.ver ?? 0)) {
+      return res
+        .status(401)
+        .json({ error: "Signed out after a password change. Please sign in again." });
     }
     req.admin = user;
     next();

@@ -187,3 +187,25 @@ export async function submitContactForm(payload) {
 
 // Exported for convenience so components can build status <select>s.
 export { STATUSES };
+
+// --- PATCH /api/shipments/:trackingNumber (ADMIN) — edit --------------
+export async function updateShipment(trackingNumber, patch) {
+  if (USE_MOCK) {
+    await delay(400);
+    return { ok: true };
+  }
+
+  const { data } = await apiClient.patch(`/shipments/${trackingNumber}`, patch);
+  return data;
+}
+
+// --- DELETE /api/shipments/:trackingNumber (ADMIN) --------------------
+export async function deleteShipment(trackingNumber) {
+  if (USE_MOCK) {
+    await delay(300);
+    return { ok: true };
+  }
+
+  const { data } = await apiClient.delete(`/shipments/${trackingNumber}`);
+  return data;
+}

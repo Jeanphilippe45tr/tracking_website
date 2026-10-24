@@ -92,6 +92,49 @@ router.post("/conversations", async (req, res) => {
 
     const fresh = await loadConversation(conversation.id);
     res.status(201).json(serializeConversation(fresh));
+
+    // Best-effort email to staff so new chats are noticed (respects the
+    // admin's "notify new messages" preference).
+    try {
+      const { AdminUser } = require("../models");
+      const admin = await AdminUser.findOne({
+        where: { email: process.env.ADMIN_EMAIL || "admin@example.com" },
+      });
+      if ((admin?.prefs ?? {}).notifyNewMessages !== false) {
+        const mailer = require("../mailer");
+        mailer.sendAdminAlert(
+          `New chat message from ${(conversation.name || "visitor").trim()}`,
+          [
+            `From:    ${conversation.name} <${conversation.email || "no email"}>`,
+            ``,
+            body,
+          ].join("\n")
+        );
+      }
+    } catch (notifyErr) {
+      console.error("[chat notify]", notifyErr.message);
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- GET /api/chat/conversations/visitor?visitorId=... ---------------
+// The visitor polls this to pull admin replies (public; scoped to the
+// one visitorId). Declared BEFORE /conversations/:id.
+router.get("/conversations/visitor", async (req, res) => {
+  try {
+    const visitorId = String(req.query.visitorId ?? "").trim();
+    if (!visitorId) {
+      return res.status(400).json({ error: "A visitor id is required." });
+    }
+    const conversation = await Conversation.findOne({
+      where: { visitorId },
+      include: { model: Message, as: "messages" },
+    });
+    res.json({
+      conversation: conversation ? serializeConversation(conversation) : null,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -78,8 +78,51 @@ async function getSession() {
   const snap = snapshot(session);
   if (before === "running" && snap.status === "completed") {
     await session.save();
+    await completeLinkedShipment(snap);
   }
   return session;
+}
+
+// -------------------------------------------------------------------
+// When the simulation completes, write the delivery back onto the
+// linked shipment so the tracking timeline matches the map.
+// -------------------------------------------------------------------
+async function completeLinkedShipment(session) {
+  try {
+    const {
+      Shipment,
+      ShipmentEvent,
+    } = require("../models");
+    const shipmentsApi = require("./shipments");
+
+    let shipment = null;
+    if (session.shipmentId) {
+      shipment = await Shipment.findByPk(session.shipmentId);
+    } else if (session.trackNumber) {
+      shipment = await Shipment.findOne({
+        where: { trackingNumber: String(session.trackNumber).trim() },
+      });
+    }
+    if (!shipment) return;
+    if (shipment.status === "Delivered") return;
+
+    shipment.status = "Delivered";
+    await shipment.save();
+
+    const event = await ShipmentEvent.create({
+      shipmentId: shipment.id,
+      status: "Delivered",
+      location: session.destination || shipment.destination,
+      description: "Delivered — live route simulation completed",
+      createdBy: "Live simulation",
+    });
+
+    if (typeof shipmentsApi.notifySubscribers === "function") {
+      shipmentsApi.notifySubscribers(shipment, event);
+    }
+  } catch (err) {
+    console.error("[live completion]", err.message);
+  }
 }
 
 async function saveCurrentProgress(session) {

@@ -6,7 +6,12 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getShipmentByTrackingNumber } from "../api/shipments";
+import {
+  getShipmentByTrackingNumber,
+} from "../api/shipments";
+import { subscribeToUpdates } from "../api/contactApi";
+import { USE_MOCK } from "../api/client";
+import apiClient from "../api/client";
 import { useLiveTracking } from "../context/LiveTrackingContext";
 import { positionAt, trailAt } from "../lib/liveTracking";
 import StatusBadge from "../components/StatusBadge";
@@ -23,25 +28,112 @@ import "../styles/pages.css";
 import "../styles/content.css";
 import "../styles/live.css";
 
-// The carriers we can show next to a shipment.
+// The carriers we can show next to a shipment when the admin has not
+// recorded one. Same stable pick as before (seeded by the tracking
+// number so it does not change on reload).
 const CARRIERS = ["SwiftTrack Express", "SwiftTrack Standard", "DHL Express", "UPS", "FedEx"];
+const CARRIER_SEED = (shipment) => {
+  let sum = 0;
+  for (const ch of shipment.trackingNumber || "") sum = (sum + ch.charCodeAt(0)) % 9973;
+  return sum;
+};
 
-// A simple estimate of the delivery date, based on the status.
+// A simple estimate of the delivery date, based on the status. When the
+// admin saved a delivery estimate it wins; otherwise we fall back to the
+// heuristic (1 day local / 3 days between cities).
 function estimateDelivery(shipment) {
   if (shipment.status === "Delivered") {
     return { label: "Delivered", date: formatDateTime(shipment.updatedAt) };
   }
   if (shipment.status === "Out for delivery") {
-    return { label: "Today", date: "before 18:00" };
+    const date = shipment.scheduledDeliveryAt
+      ? formatDateTime(shipment.scheduledDeliveryAt)
+      : "before 18:00";
+    return { label: "Today", date };
   }
   if (shipment.status === "Delayed") {
     return { label: "Delayed", date: "new date within 48h" };
+  }
+  if (shipment.scheduledDeliveryAt) {
+    return {
+      label: "Estimated",
+      date: formatDateTime(shipment.scheduledDeliveryAt),
+    };
   }
   const days = shipment.origin === shipment.destination ? 1 : 3;
   const date = new Date(
     new Date(shipment.updatedAt).getTime() + days * 24 * 60 * 60 * 1000
   );
   return { label: "Estimated", date: formatDateTime(date) };
+}
+
+// "Notify me" — the recipient registers an email so we can tell them
+// the moment the parcel changes status (the site copy advertises this;
+// this card + POST /api/notifications/subscribe make it real).
+function NotifyCard({ trackingNumber }) {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState({ status: "idle", message: "" });
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setState({ status: "saving", message: "" });
+    try {
+      const result = await subscribeToUpdates({ trackingNumber, email: email.trim() });
+      setState({ status: "done", message: result.message || "You will get email updates." });
+      setEmail("");
+    } catch (err) {
+      setState({ status: "error", message: err.message || "Could not subscribe." });
+    }
+  };
+
+  return (
+    <section className="notify-card card">
+      <span className="track-eta-icon" aria-hidden="true">
+        <Icon name="bell" size={22} />
+      </span>
+      <form className="notify-form" onSubmit={submit}>
+        <div>
+          <h3>Email me when it moves</h3>
+          <p className="info-muted">
+            We will notify you the moment this parcel changes status.
+          </p>
+        </div>
+        <div className="notify-field">
+          <label htmlFor="notify-email" className="sr-only">
+            Email address
+          </label>
+          <input
+            id="notify-email"
+            type="email"
+            className="form-input"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setState({ status: "idle", message: "" });
+            }}
+            required
+          />
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm"
+            disabled={state.status === "saving"}
+          >
+            {state.status === "saving" ? "Saving…" : "Notify me"}
+          </button>
+        </div>
+        {state.message && (
+          <p
+            className={state.status === "error" ? "field-error" : "newsletter-ok"}
+            role={state.status === "error" ? "alert" : "status"}
+            style={state.status === "error" ? undefined : { color: "#16a34a", display: "block" }}
+          >
+            {state.message}
+          </p>
+        )}
+      </form>
+    </section>
+  );
 }
 
 export default function TrackResult() {
@@ -85,6 +177,46 @@ export default function TrackResult() {
     // Scroll to top when arriving on a new result.
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [loadShipment]);
+
+  // Keep the page fresh: poll every 30s until the parcel is delivered, so
+  // new scans show up without a manual refresh. The effect keys on the
+  // final-state booleans rather than the whole shipment object.
+  const isFinal = shipment?.status === "Delivered";
+  const isLoaded = Boolean(shipment);
+  useEffect(() => {
+    if (isFinal || !isLoaded) return undefined;
+
+    const timer = setInterval(async () => {
+      try {
+        const data = await getShipmentByTrackingNumber(trackingNumber);
+        setShipment((prev) => {
+          if (
+            prev &&
+            data.status === prev.status &&
+            (data.events?.length || 0) === (prev.events?.length || 0)
+          ) {
+            return prev; // no visible change -> skip re-render
+          }
+          return data;
+        });
+      } catch {
+        // A failed poll is not fatal — the next tick will retry.
+      }
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [trackingNumber, isLoaded, isFinal]);
+
+  // Unsubscribe link support: /track/TRK...?unsubscribe=<token> arrives
+  // from the "stop updates" link inside notification emails.
+  useEffect(() => {
+    if (USE_MOCK) return undefined;
+    const token = new URLSearchParams(window.location.search).get("unsubscribe");
+    if (!token) return undefined;
+    apiClient.get("/notifications/unsubscribe", { params: { token } }).catch(() => {
+      // The token may already be used or invalid; nothing to show.
+    });
+    return undefined;
+  }, []);
 
   // The map points: origin, destination and every scanned location.
   // If the admin simulation is running for THIS shipment, we also add the
@@ -272,7 +404,11 @@ export default function TrackResult() {
               )}
               <StatusBadge status={shipment.status} />
               <span className="track-carrier">
-                <Icon name="truck" size={15} /> {CARRIERS[shipment.id % CARRIERS.length]}
+                <Icon name="truck" size={15} />
+                {shipment.carrier
+                  ? shipment.carrier
+                  : CARRIERS[CARRIER_SEED(shipment) % CARRIERS.length]}
+                {shipment.serviceLevel ? ` · ${shipment.serviceLevel}` : ""}
               </span>
             </div>
           </div>
@@ -387,10 +523,17 @@ export default function TrackResult() {
             <strong>{formatDateTime(shipment.createdAt)}</strong>
           </div>
           <div>
-            <span className="info-muted">Insured for</span>
-            <strong>$10,000</strong>
+            <span className="info-muted">Cost</span>
+            <strong>
+              {shipment.cost != null ? `$${shipment.cost.toFixed(2)}` : "—"}
+            </strong>
           </div>
         </div>
+
+        {/* ---------------- NOTIFY ME ---------------- */}
+        {shipment.status !== "Delivered" && (
+          <NotifyCard trackingNumber={shipment.trackingNumber} />
+        )}
 
         {/* ---------------- TIMELINE ---------------- */}
         <section className="timeline-section">

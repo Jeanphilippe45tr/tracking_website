@@ -426,17 +426,26 @@ PUBLIC
   GET    /api/live                               # live simulation state
   POST   /api/contact                            # contact form
   POST   /api/chat/conversations                 # visitor starts chat / sends msg
-  PATCH  /api/chat/conversations/visitor/:visitorId/read
+  GET    /api/chat/conversations/visitor?visitorId=   # visitor pulls own thread
+  PATCH  /api/chat/conversations/visitor/read    # visitor read receipts
+  POST   /api/notifications/subscribe            # "Notify me" (tracking + email)
+  GET    /api/notifications/unsubscribe?token=   # one-time unsubscribe (email link)
+  POST   /api/notifications/newsletter           # footer newsletter signup
 
 ADMIN (Bearer token)
   POST   /api/auth/login
   GET    /api/auth/me
   PATCH  /api/auth/me
-  POST   /api/auth/change-password
+  POST   /api/auth/change-password   # bumps tokenVersion -> old JWTs die
   PATCH  /api/auth/preferences
   GET    /api/shipments
   POST   /api/shipments
-  POST   /api/shipments/:trackingNumber/events
+  PATCH  /api/shipments/:trackingNumber   # edit fields (route locked when delivered)
+  DELETE /api/shipments/:trackingNumber   # remove shipment (+ events, subs)
+  POST   /api/shipments/:trackingNumber/events   # status transitions enforced
+  GET    /api/contact                    # contact inbox
+  PATCH  /api/contact/:id/read
+  DELETE /api/contact/:id
   GET    /api/chat/conversations
   GET    /api/chat/conversations/:id
   POST   /api/chat/conversations/:id/messages
@@ -446,3 +455,14 @@ ADMIN (Bearer token)
   DELETE /api/chat/conversations
   POST   /api/live/start | /live/pause | /live/resume | /live/stop | /live/reset | /live/speed
 ```
+
+## Security & background behaviour (added)
+
+- `helmet`, rate limiting (600/15min API floor, 20/15min on /api/auth,
+  20/30min on /api/chat), CORS allow-list via `ALLOWED_ORIGIN` (unset = open, dev).
+- Password change bumps `tokenVersion`; every previously issued JWT dies.
+- Emails: SMTP via `SMTP_*` env, otherwise log-mode. Fires on contact/chats
+  (to the staff inbox), status changes + completion (to "Notify me" subscribers).
+- Shipment status transitions enforce a forward-flow (Delivered terminal,
+  Delayed resumes only). The live simulation completion writes the
+  `Delivered` event onto the linked shipment and notifies subscribers.

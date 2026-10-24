@@ -7,6 +7,7 @@
 // -------------------------------------------------------------------
 
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LiveTrackingProvider } from "./context/LiveTrackingContext";
 import { SettingsProvider } from "./context/SettingsContext";
@@ -16,6 +17,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import AdminNav from "./components/AdminNav";
 import ChatWidget from "./components/ChatWidget";
+import {
+  startAdminChatPolling,
+  stopAdminChatPolling,
+} from "./lib/chat";
 
 // Public pages
 import Home from "./pages/Home";
@@ -39,6 +44,7 @@ import ShipmentsList from "./pages/admin/ShipmentsList";
 import CreateShipment from "./pages/admin/CreateShipment";
 import ShipmentDetail from "./pages/admin/ShipmentDetail";
 import Messages from "./pages/admin/Messages";
+import ContactInbox from "./pages/admin/ContactInbox";
 import Settings from "./pages/admin/Settings";
 
 // A shared layout for the public pages: navbar on top, footer below.
@@ -55,8 +61,17 @@ function PublicLayout({ children }) {
 }
 
 // A layout for the admin area: navbar + admin tabs, no marketing footer.
+// While an admin is signed in, the chat inbox is polled for live updates.
 function AdminLayout({ children }) {
   const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      startAdminChatPolling();
+      return stopAdminChatPolling;
+    }
+    return undefined;
+  }, [isAuthenticated]);
 
   return (
     <>
@@ -232,6 +247,16 @@ export default function App() {
               <ProtectedRoute>
                 <AdminLayout>
                   <Messages />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/contact"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ContactInbox />
                 </AdminLayout>
               </ProtectedRoute>
             }

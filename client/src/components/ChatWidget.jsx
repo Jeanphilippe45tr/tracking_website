@@ -10,12 +10,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   conversationForVisitor,
   markReadByCustomer,
+  refreshVisitorConversation,
   sendCustomerMessage,
   unreadForCustomer,
   useChatStore,
   useVisitor,
   saveVisitor,
 } from "../lib/chat";
+import { USE_MOCK } from "../api/client";
 import { useBrand } from "../context/SettingsContext";
 import { formatChatTime } from "../utils/format";
 import Icon from "./Icon";
@@ -54,6 +56,18 @@ export default function ChatWidget() {
       markReadByCustomer(visitor.id);
     }
   }, [open, hasIdentity, messages.length, visitor.id]);
+
+  // Real mode: poll the server every few seconds so admin replies show
+  // up (and the unread badge stays honest), even when the panel is shut.
+  useEffect(() => {
+    if (USE_MOCK || !hasIdentity) return undefined;
+    refreshVisitorConversation(visitor.id);
+    const timer = setInterval(
+      () => refreshVisitorConversation(visitor.id),
+      4000
+    );
+    return () => clearInterval(timer);
+  }, [visitor.id, hasIdentity]);
 
   // Keep the latest message visible.
   useEffect(() => {

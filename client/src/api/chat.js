@@ -19,6 +19,19 @@ export async function createConversation(payload) {
   return data;
 }
 
+// --- GET /api/chat/conversations/visitor?visitorId=... ---
+// Public: the visitor's own conversation, scoped by visitorId.
+export async function getVisitorConversation(visitorId) {
+  if (USE_MOCK) {
+    await delay(300);
+    throw new Error("Not implemented in mock mode");
+  }
+
+  const params = { visitorId };
+  const { data } = await apiClient.get("/chat/conversations/visitor", { params });
+  return data;
+}
+
 // --- GET /api/chat/conversations ---
 export async function getConversations() {
   if (USE_MOCK) {

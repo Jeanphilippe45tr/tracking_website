@@ -91,24 +91,71 @@ if (USE_MOCK) {
       return cache;
     },
     async refresh() {
+      // ADMIN sync: full inbox from the server.
       try {
         const data = await chatApi.getConversations();
         const conversations = data.conversations || [];
         const unreadForAdmin = data.unreadForAdmin || 0;
         cache = { conversations, unreadForAdmin };
         emit();
+        return true;
       } catch (err) {
         // If unauthorized (401), stop polling - admin not logged in or token expired
         if (err.status === 401) {
-          stopPolling();
+          stopAdminPolling();
         }
-        console.error("Failed to fetch conversations:", err);
+        return false;
       }
+    },
+    async refreshVisitor(visitorId) {
+      // VISITOR sync: pull the visitor's own conversation (public route).
+      if (!visitorId) return false;
+      try {
+        const data = await chatApi.getVisitorConversation(visitorId);
+        const incoming = data.conversation;
+        const next = { ...cache };
+        next.conversations = upsert(next.conversations, incoming);
+        cache = next;
+        emit();
+        return true;
+      } catch {
+        // Network hiccups are fine — the next poll will retry.
+        return false;
+      }
+    },
+    set(patch) {
+      cache = { ...cache, ...patch };
+      emit();
     },
   };
 
-  // Visitor store for real mode
-  let visitorCache = { id: uid("visitor"), name: "", email: "" };
+  // Merge one server conversation into the cached list.
+  function upsert(conversations, incoming) {
+    if (!incoming) return conversations;
+    const rest = conversations.filter(
+      (c) => c.id !== incoming.id && c.visitorId !== incoming.visitorId
+    );
+    return [incoming, ...rest];
+  }
+
+  // Visitor store for real mode. The visitor id is kept in localStorage
+  // so the chat thread survives reloads.
+  const VISITOR_KEY = "swifttrack.visitor.v1";
+  function loadVisitor() {
+    if (typeof window === "undefined") return { id: uid("visitor"), name: "", email: "" };
+    try {
+      const raw = window.localStorage.getItem(VISITOR_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.id) return parsed;
+      }
+    } catch {
+      // Corrupted payload — start fresh.
+    }
+    return { id: uid("visitor"), name: "", email: "" };
+  }
+
+  let visitorCache = loadVisitor();
   const visitorListeners = new Set();
 
   function visitorEmit() {
@@ -125,42 +172,33 @@ if (USE_MOCK) {
     },
     set(patch) {
       visitorCache = { ...visitorCache, ...patch };
+      try {
+        window.localStorage.setItem(VISITOR_KEY, JSON.stringify(visitorCache));
+      } catch {
+        // Storage unavailable (private mode) — keep in-memory only.
+      }
       visitorEmit();
     },
   };
 
-  // Polling control - only poll when admin is authenticated
+  // -----------------------------------------------------------------
+  // Polling control. The admin inbox is polled only while an admin is
+  // signed in; ChatWidget drives the visitor-side polling.
+  // -----------------------------------------------------------------
   let pollInterval = null;
-  function startPolling() {
+  const startAdminPolling = () => {
     if (pollInterval) return;
-    pollInterval = setInterval(() => chatStoreImpl.refresh(), 3000);
+    pollInterval = setInterval(() => chatStoreImpl.refresh(), 4000);
     chatStoreImpl.refresh(); // initial fetch
-  }
-  function stopPolling() {
+  };
+  const stopAdminPolling = () => {
     if (pollInterval) {
       clearInterval(pollInterval);
       pollInterval = null;
     }
-  }
-  // Check for admin token and start/stop polling accordingly
-  function checkAuthAndPoll() {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (token) {
-      startPolling();
-    } else {
-      stopPolling();
-    }
-  }
-  // Initial check
-  checkAuthAndPoll();
-  // Listen for storage changes (login/logout in another tab)
-  if (typeof window !== "undefined") {
-    window.addEventListener("storage", (e) => {
-      if (e.key === "token") {
-        checkAuthAndPoll();
-      }
-    });
-  }
+  };
+  chatStoreImpl.startAdminPolling = startAdminPolling;
+  chatStoreImpl.stopAdminPolling = stopAdminPolling;
 }
 
 // Unified hooks - always call useSyncExternalStore in the same order
@@ -286,6 +324,8 @@ export function sendCustomerMessage(visitor, text) {
       };
     });
   } else {
+    // Real mode: server persists the message and returns the thread;
+    // merge it straight into the store (no admin call needed).
     chatApi
       .createConversation({
         visitorId: visitor.id,
@@ -293,8 +333,25 @@ export function sendCustomerMessage(visitor, text) {
         email: visitor.email,
         text: body,
       })
-      .then(() => chatStoreImpl.refresh());
+      .then((conversation) => {
+        chatStoreImpl.set((state) => ({
+          ...state,
+          conversations: upsertConversations(state.conversations, conversation),
+        }));
+      })
+      .catch(() => {
+        // Leave the UI state alone; the poller will reconcile.
+      });
   }
+}
+
+// Merge one server conversation into an existing list (used in real mode).
+function upsertConversations(conversations, incoming) {
+  if (!incoming) return conversations;
+  const rest = conversations.filter(
+    (c) => c.id !== incoming.id && c.visitorId !== incoming.visitorId
+  );
+  return [incoming, ...rest];
 }
 
 export function sendAdminMessage(conversationId, text) {
@@ -404,7 +461,30 @@ export function markReadByCustomer(visitorId) {
       return changed ? { ...state, conversations } : state;
     });
   } else {
-    chatApi.markReadByCustomer(visitorId).then(() => chatStoreImpl.refresh());
+    chatApi.markReadByCustomer(visitorId).then(() => {
+      chatStoreImpl.refreshVisitor(visitorId);
+    });
+  }
+}
+
+// Pull the visitor's thread from the server into the store (real mode).
+export function refreshVisitorConversation(visitorId) {
+  if (!USE_MOCK) {
+    chatStoreImpl.refreshVisitor(visitorId);
+  }
+}
+
+// Start/stop polling the admin inbox (real mode). Call from an admin
+// layout component when auth state changes.
+export function startAdminChatPolling() {
+  if (!USE_MOCK && chatStoreImpl.startAdminPolling) {
+    chatStoreImpl.startAdminPolling();
+  }
+}
+
+export function stopAdminChatPolling() {
+  if (!USE_MOCK && chatStoreImpl.stopAdminPolling) {
+    chatStoreImpl.stopAdminPolling();
   }
 }
 

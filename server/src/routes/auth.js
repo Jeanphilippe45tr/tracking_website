@@ -103,9 +103,11 @@ router.post("/change-password", requireAuth, async (req, res) => {
 
     user.passwordHash = await bcrypt.hash(String(newPassword), 10);
     user.passwordChangedAt = new Date();
+    // Invalidates every previously issued JWT for this admin.
+    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await user.save();
 
-    return res.json({ ok: true });
+    return res.json({ ok: true, token: signToken(user) });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

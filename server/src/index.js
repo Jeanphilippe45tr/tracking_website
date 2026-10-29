@@ -15,15 +15,20 @@ const app = express();
 // Helmet: API-only service, so CSP etc. are left as helmet defaults.
 app.use(helmet());
 
-// CORS allow-list — ALLOWED_ORIGIN is a comma-separated list of the
-// exact origins allowed to call the API (the deployed Vercel frontend).
-// Values are normalized (trim, lowercase, no trailing slash, no scheme
-// typos) so "https://x.vercel.app/" or " https://x.vercel.app" and the
-// copy-pasted-with-slash variant all work. Unset (local dev) = allow all.
-const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
+// CORS allow-list — ALLOWED_ORIGIN is a comma-separated list of origins
+// allowed to call the API. Values are normalized (trim, lowercase, no
+// trailing slash, no quotes) and two forms are supported:
+//   https://client-five-omega-66.vercel.app   exact origin match
+//   *.vercel.app                              wildcard subdomain match
+// Unset (local dev) = allow all origins.
+const rawOrigins = (process.env.ALLOWED_ORIGIN || "")
   .split(",")
   .map((s) => s.trim().replace(/^['"]|['"]$/g, "").replace(/\/+$/, "").toLowerCase())
   .filter(Boolean);
+const allowedOrigins = rawOrigins.filter((e) => !e.startsWith("*."));
+const allowedSuffixes = rawOrigins
+  .filter((e) => e.startsWith("*."))
+  .map((e) => e.slice(1)); // "*.vercel.app" -> ".vercel.app"
 
 function normalizeOrigin(origin) {
   return String(origin || "")
@@ -32,13 +37,21 @@ function normalizeOrigin(origin) {
     .toLowerCase();
 }
 
-if (allowedOrigins.length > 0) {
+function isOriginAllowed(origin) {
+  const o = normalizeOrigin(origin);
+  if (allowedOrigins.includes(o)) return true;
+  return allowedSuffixes.some((suffix) =>
+    o.endsWith(suffix)
+  );
+}
+
+if (rawOrigins.length > 0) {
   app.use(
     cors({
       origin(origin, cb) {
         // `!origin` covers same-origin/service-to-service calls (curl,
         // health checks) — allowed with no ACAO header needed.
-        if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
+        if (!origin || isOriginAllowed(origin)) {
           return cb(null, true);
         }
         return cb(null, false); // deny silently, no headers set

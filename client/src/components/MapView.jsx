@@ -12,11 +12,12 @@ import Icon from "./Icon";
 import { DEFAULT_CENTER } from "../data/geo";
 import "../styles/map.css";
 
-// The tile server used for the map background.
-const TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+// The tile server used for the map background. Uses the free, key-less
+// OpenStreetMap tile server (CARTO's CDN now requires an API key and
+// returns an "API key required" placeholder tile without one).
+const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 // A styled marker (a dot with a soft halo) instead of the default pin.
 function makeIcon(color, isActive, isLive) {
@@ -29,6 +30,33 @@ function makeIcon(color, isActive, isLive) {
     iconAnchor: [9, 9],
     popupAnchor: [0, -10],
   });
+}
+
+// Leaflet popups render raw HTML: escape every text field so admin- or
+// user-supplied strings (event titles, relay hours, …) cannot inject
+// markup into the page.
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => {
+    switch (ch) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
+}
+
+function popupHtml(point) {
+  const base = `<strong>${escapeHtml(point.title)}</strong>`;
+  const subtitle = point.subtitle ? `<br/>${escapeHtml(point.subtitle)}` : "";
+  const hours = point.hours ? `<br/><em>${escapeHtml(point.hours)}</em>` : "";
+  return base + subtitle + hours;
 }
 
 export default function MapView({
@@ -128,11 +156,7 @@ export default function MapView({
         title: point.title,
       }).addTo(map);
 
-      marker.bindPopup(
-        `<strong>${point.title}</strong>` +
-          (point.subtitle ? `<br/>${point.subtitle}` : "") +
-          (point.hours ? `<br/><em>${point.hours}</em>` : "")
-      );
+      marker.bindPopup(popupHtml(point));
 
       bounds.push([point.lat, point.lng]);
     });

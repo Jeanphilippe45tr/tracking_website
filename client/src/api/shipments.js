@@ -173,5 +173,39 @@ export async function getRelayPoints(query = "") {
   return data;
 }
 
+// --- POST /api/contact (PUBLIC) --------------------------------------
+// Submits a contact form.
+export async function submitContactForm(payload) {
+  if (USE_MOCK) {
+    await delay(600);
+    return { ok: true, id: `mock-${Date.now()}` };
+  }
+
+  const { data } = await apiClient.post("/contact", payload);
+  return data;
+}
+
 // Exported for convenience so components can build status <select>s.
 export { STATUSES };
+
+// --- PATCH /api/shipments/:trackingNumber (ADMIN) — edit --------------
+export async function updateShipment(trackingNumber, patch) {
+  if (USE_MOCK) {
+    await delay(400);
+    return { ok: true };
+  }
+
+  const { data } = await apiClient.patch(`/shipments/${trackingNumber}`, patch);
+  return data;
+}
+
+// --- DELETE /api/shipments/:trackingNumber (ADMIN) --------------------
+export async function deleteShipment(trackingNumber) {
+  if (USE_MOCK) {
+    await delay(300);
+    return { ok: true };
+  }
+
+  const { data } = await apiClient.delete(`/shipments/${trackingNumber}`);
+  return data;
+}

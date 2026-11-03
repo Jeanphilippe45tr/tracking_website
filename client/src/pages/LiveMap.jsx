@@ -212,6 +212,12 @@ export default function LiveMap() {
                       <strong>{live.speed}×</strong>
                     </div>
                     <div className="live-fact">
+                      <span>Distance</span>
+                      <strong>
+                        {live.distanceKm > 0 ? `${live.distanceKm} km` : "—"}
+                      </strong>
+                    </div>
+                    <div className="live-fact">
                       <span>Last update</span>
                       <strong>
                         {live.updatedAt

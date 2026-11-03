@@ -8,7 +8,8 @@ import PageHero from "../components/PageHero";
 import SectionHeading from "../components/SectionHeading";
 import FaqList from "../components/FaqList";
 import Icon from "../components/Icon";
-import { BRAND, DEMO_NUMBERS, FAQ_HOME, IMAGES } from "../data/site";
+import { DEMO_NUMBERS, FAQ_HOME, IMAGES } from "../data/site";
+import { useBrand } from "../context/SettingsContext";
 import "../styles/pages.css";
 import "../styles/content.css";
 
@@ -31,6 +32,7 @@ const WAYS = [
 ];
 
 export default function Track() {
+  const brand = useBrand();
   return (
     <div className="page">
       <PageHero
@@ -153,8 +155,8 @@ export default function Track() {
               </p>
             </div>
             <div className="track-support-actions">
-              <a href={`tel:${BRAND.phoneHref}`} className="btn btn-primary">
-                <Icon name="phone" size={16} /> {BRAND.phone}
+              <a href={`tel:${brand.phoneHref}`} className="btn btn-primary">
+                <Icon name="phone" size={16} /> {brand.phone}
               </a>
               <Link to="/contact" className="btn btn-outline">
                 Contact us

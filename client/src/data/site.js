@@ -21,13 +21,15 @@ export const img = (id, w = 1200, h = 800, extra = "") =>
 // -------------------------------------------------------------------
 // Brand + contact details
 // -------------------------------------------------------------------
+// DEFAULT values only. The live values are managed by the admin in the
+// Settings page and loaded via the SettingsProvider (PATCH /api/settings).
 export const BRAND = {
   name: "SwiftTrack",
   legalName: "SwiftTrack Logistics Inc.",
   tagline: "Global parcel tracking across the US, Europe and Asia",
   email: "support@swifttrack.com",
   phone: "+1 (212) 555-0142",
-  phoneHref: "+12125550142",
+  phoneHref: "+1 (212) 555-0142".replace(/\s/g, ""),
   whatsapp: "+1 (212) 555-0142",
   address: "350 Fifth Avenue, Suite 4200, New York, NY 10118, USA",
   hours: "Every day · 08:00 – 20:00 ET",

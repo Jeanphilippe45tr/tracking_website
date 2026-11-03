@@ -2241,3 +2241,31 @@ div[id].service-detail {
     font-size: 0.82rem;
   }
 }
+
+/* -----------------------------------------------------------------
+   "Notify me" card on the tracking result page
+   ----------------------------------------------------------------- */
+.notify-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin: 0 auto var(--space-5) auto;
+  max-width: var(--page-width, 1000px);
+}
+
+.notify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  flex: 1;
+}
+
+.notify-field {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 460px;
+}
+
+.notify-field .form-input {
+  flex: 1;
+}

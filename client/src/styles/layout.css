@@ -374,6 +374,13 @@
   color: #86efac;
 }
 
+.newsletter-error {
+  grid-column: 1 / -1;
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: #fca5a5;
+}
+
 /* ---------------- Link columns ---------------- */
 .footer-grid {
   display: grid;

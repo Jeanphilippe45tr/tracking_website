@@ -16,7 +16,6 @@ import {
   SIM_BASE_DURATION_MS,
   SPEED_OPTIONS,
 } from "../lib/liveTracking";
-import { useAdminAccount } from "../lib/adminAccount";
 import { DEFAULT_CENTER } from "../data/geo";
 import MapView from "./MapView";
 import Icon from "./Icon";
@@ -40,12 +39,11 @@ function formatEta(ms) {
 
 export default function SimulationPanel({ shipments = [] }) {
   const live = useLiveTracking();
-  const account = useAdminAccount();
 
-  // Speed chosen before starting. While running we follow live.speed.
-  const [speed, setSpeed] = useState(
-    Number(account?.prefs?.defaultSpeed) || 2
-  );
+  // Speed chosen before starting. "auto" lets the server pick a
+  // realistic speed from the route distance; the admin can override it
+  // at any moment (before or during the run) with the same selector.
+  const [speed, setSpeed] = useState("auto");
   const [choice, setChoice] = useState("");
 
   const defaultTracking = useMemo(() => {
@@ -62,10 +60,25 @@ export default function SimulationPanel({ shipments = [] }) {
   );
 
   const isLive = live.route.length > 0;
+  // Precise coordinates when the server geocoded the full addresses —
+  // both the preview and the live run then point at the exact spot.
+  const originPreviewCoords =
+    selectedShipment?.originLat != null
+      ? [selectedShipment.originLat, selectedShipment.originLng]
+      : null;
+  const destPreviewCoords =
+    selectedShipment?.destinationLat != null
+      ? [selectedShipment.destinationLat, selectedShipment.destinationLng]
+      : null;
   const route = isLive
     ? live.route
     : selectedShipment
-      ? buildRoute(selectedShipment.origin, selectedShipment.destination)
+      ? buildRoute(
+          selectedShipment.origin,
+          selectedShipment.destination,
+          originPreviewCoords,
+          destPreviewCoords
+        )
       : [];
 
   const progress = isLive ? live.progress : 0;
@@ -123,14 +136,19 @@ export default function SimulationPanel({ shipments = [] }) {
       shipmentId: selectedShipment.id,
       origin: selectedShipment.origin,
       destination: selectedShipment.destination,
-      speed: Number(speed),
+      // "auto" → the server derives a realistic speed from the route
+      // distance; any number is passed straight through.
+      speed: speed === "auto" ? undefined : Number(speed),
     });
   };
 
   const handleSpeed = (value) => {
+    // "auto" simply snaps the running parcel back to the server's
+    // suggested speed for the plotted distance.
+    const effective = value === "auto" ? live.suggestedSpeed : value;
     setSpeed(value);
     if (live.status === "running" || live.status === "paused") {
-      live.setSpeed(value);
+      live.setSpeed(effective);
     }
   };
 
@@ -208,8 +226,20 @@ export default function SimulationPanel({ shipments = [] }) {
                 id="sim-speed"
                 className="form-input"
                 value={isLive ? live.speed : speed}
-                onChange={(event) => handleSpeed(Number(event.target.value))}
+                onChange={(event) =>
+                  handleSpeed(
+                    event.target.value === "auto"
+                      ? "auto"
+                      : Number(event.target.value)
+                  )
+                }
               >
+                <option value="auto">
+                  Auto — realistic, from route distance
+                </option>
+                {isLive && !SPEED_OPTIONS.includes(live.speed) && (
+                  <option value={live.speed}>{live.speed}×</option>
+                )}
                 {SPEED_OPTIONS.map((option) => (
                   <option key={option} value={option}>
                     {option}×
@@ -240,7 +270,16 @@ export default function SimulationPanel({ shipments = [] }) {
               ETA <strong>{isLive ? formatEta(remainingMs) : "—"}</strong>
             </span>
             <span>
-              Speed <strong>{isLive ? `${live.speed}×` : `${speed}×`}</strong>
+              Speed{" "}
+              <strong>
+                {isLive ? `${live.speed}×` : speed === "auto" ? "auto" : `${speed}×`}
+              </strong>
+            </span>
+            <span>
+              Route{" "}
+              <strong>
+                {isLive && live.distanceKm > 0 ? `${live.distanceKm} km` : "—"}
+              </strong>
             </span>
             <span>
               Tracking{" "}

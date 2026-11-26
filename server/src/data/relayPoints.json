@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Relay Point Midtown Manhattan",
+    "address": "245 Madison Avenue, New York, NY 10016",
+    "city": "New York",
+    "postalCode": "10016",
+    "hours": "Mon-Sat 08:00-20:00",
+    "distance": 0.8
+  },
+  {
+    "id": 2,
+    "name": "Relay Point Brooklyn Heights",
+    "address": "128 Montague Street, Brooklyn, NY 11201",
+    "city": "New York",
+    "postalCode": "11201",
+    "hours": "Mon-Sat 08:00-19:00",
+    "distance": 2.4
+  },
+  {
+    "id": 3,
+    "name": "Relay Point Canary Wharf",
+    "address": "15 Cabot Square, London E14 4QS",
+    "city": "London",
+    "postalCode": "E14",
+    "hours": "Mon-Sat 08:00-20:00",
+    "distance": 0.6
+  },
+  {
+    "id": 4,
+    "name": "Relay Point Shoreditch",
+    "address": "86 Great Eastern Street, London EC2A 3JL",
+    "city": "London",
+    "postalCode": "EC2A",
+    "hours": "Mon-Sun 09:00-21:00",
+    "distance": 1.1
+  },
+  {
+    "id": 5,
+    "name": "Relay Point Paris 11",
+    "address": "56 Rue de la Roquette, 75011 Paris",
+    "city": "Paris",
+    "postalCode": "75011",
+    "hours": "Mon-Sat 09:00-20:00",
+    "distance": 0.6
+  },
+  {
+    "id": 6,
+    "name": "Relay Point Berlin Mitte",
+    "address": "Torstraße 140, 10119 Berlin",
+    "city": "Berlin",
+    "postalCode": "10119",
+    "hours": "Mon-Sat 08:00-20:00",
+    "distance": 1.4
+  },
+  {
+    "id": 7,
+    "name": "Relay Point Marina Bay",
+    "address": "8 Marina Boulevard, Singapore 018981",
+    "city": "Singapore",
+    "postalCode": "018981",
+    "hours": "Mon-Sat 08:30-19:00",
+    "distance": 0.9
+  },
+  {
+    "id": 8,
+    "name": "Relay Point Queen West",
+    "address": "478 Queen Street West, Toronto, ON M5V 2B2",
+    "city": "Toronto",
+    "postalCode": "M5V 2B2",
+    "hours": "Mon-Sat 09:00-19:30",
+    "distance": 1.7
+  }
+]

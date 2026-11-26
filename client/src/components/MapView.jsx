@@ -13,10 +13,9 @@ import { DEFAULT_CENTER } from "../data/geo";
 import "../styles/map.css";
 
 // The tile server used for the map background.
-const TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 // A styled marker (a dot with a soft halo) instead of the default pin.
 function makeIcon(color, isActive, isLive) {

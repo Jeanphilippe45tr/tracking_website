@@ -6,8 +6,9 @@
 // here to decide whether to show a page or redirect to /admin/login.
 // -------------------------------------------------------------------
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import * as authApi from "../api/auth";
+import { USE_MOCK } from "../api/client";
 
 const AuthContext = createContext(null);
 
@@ -16,11 +17,35 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [user, setUser] = useState(() => {
     // The lightweight user object is kept in memory only, but we can
-    // rebuild it from localStorage if needed. Here we simply try to
-    // restore the email we stored alongside the token.
+    // rebuild it from localStorage if needed.
     const raw = localStorage.getItem("user");
     return raw ? JSON.parse(raw) : null;
   });
+
+  useEffect(() => {
+    if (USE_MOCK || !token) return;
+    let active = true;
+    (async () => {
+      try {
+        const me = await authApi.getMe();
+        if (active) {
+          localStorage.setItem("user", JSON.stringify(me));
+          setUser(me);
+        }
+      } catch {
+        // If the token is invalid, clear it.
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        if (active) {
+          setToken(null);
+          setUser(null);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [token]);
 
   // Log in: call the API, then save token + user.
   const login = useCallback(async (email, password) => {

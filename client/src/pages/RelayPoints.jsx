@@ -160,7 +160,6 @@ export default function RelayPoints() {
                 center={mapData.center}
                 zoom={5}
                 height={420}
-                emptyText="No relay point to display."
               />
             </div>
             <p className="relay-map-note">

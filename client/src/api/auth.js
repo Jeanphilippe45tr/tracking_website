@@ -44,6 +44,18 @@ export async function login(email, password) {
   return data;
 }
 
+// --- GET /auth/me -------------------------------------------------
+// Rehydrates the session on page load (profile + preferences).
+export async function getMe() {
+  if (USE_MOCK) {
+    await delay(200);
+    return toPublicUser(getAdminAccount());
+  }
+
+  const { data } = await apiClient.get("/auth/me");
+  return data;
+}
+
 // --- PATCH /auth/me ------------------------------------------------
 // Updates the profile (name, email, phone). Returns the public user.
 export async function updateProfile(patch) {

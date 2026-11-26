@@ -32,6 +32,42 @@ export function generateTrackingNumber() {
   return `TRK${code}`;
 }
 
+// Delivery people available in mock mode. They mirror the server seed.
+export const mockCouriers = [
+  {
+    id: 1,
+    name: "Diego Alvarez",
+    phone: "+1 (212) 555-0175",
+    email: "diego@swifttrack.example",
+    vehicle: "Cargo van - NYC-14",
+    isActive: true,
+  },
+  {
+    id: 2,
+    name: "Amara Okafor",
+    phone: "+44 20 7946 0588",
+    email: "amara@swifttrack.example",
+    vehicle: "Electric van - LDN-07",
+    isActive: true,
+  },
+  {
+    id: 3,
+    name: "Lucas Moreau",
+    phone: "+33 6 45 78 12 90",
+    email: "lucas@swifttrack.example",
+    vehicle: "Scooter - PAR-21",
+    isActive: true,
+  },
+  {
+    id: 4,
+    name: "Sofia Rossi",
+    phone: "+49 30 555 0164",
+    email: "sofia@swifttrack.example",
+    vehicle: "Cargo bike - BER-03",
+    isActive: true,
+  },
+];
+
 // Helper to build ISO date strings relative to "now" minus N hours.
 // Using relative dates keeps the mock data looking fresh whenever you
 // open the app.
@@ -312,6 +348,92 @@ export const mockShipments = [
   },
 ];
 
+// Address details and coordinates for the demo shipments. Keeping them in
+// the mock data means the maps work immediately in mock mode too.
+const mockShipmentExtras = {
+  TRK000000001: {
+    originAddress: "350 5th Avenue",
+    originRegion: "NY",
+    originPostalCode: "10118",
+    originCountry: "United States",
+    originLat: 40.7484,
+    originLng: -73.9857,
+    destinationAddress: "1 City Hall Square",
+    destinationRegion: "MA",
+    destinationPostalCode: "02201",
+    destinationCountry: "United States",
+    destinationLat: 42.3604,
+    destinationLng: -71.0589,
+  },
+  TRK3F9A12BC7D: {
+    originLat: 40.7128,
+    originLng: -74.006,
+    destinationLat: 51.5072,
+    destinationLng: -0.1276,
+  },
+  TRK5B7C9D2EF1A: {
+    originAddress: "15 Cabot Square",
+    originRegion: "Greater London",
+    originPostalCode: "E14 4QS",
+    originCountry: "United Kingdom",
+    originLat: 51.5054,
+    originLng: -0.0203,
+    destinationAddress: "56 Rue de la Roquette",
+    destinationRegion: "Ile-de-France",
+    destinationPostalCode: "75011",
+    destinationCountry: "France",
+    destinationLat: 48.8566,
+    destinationLng: 2.3772,
+  },
+  TRK8A1B2C3D4E: {
+    originLat: 52.52,
+    originLng: 13.405,
+    destinationLat: 52.3676,
+    destinationLng: 4.9041,
+  },
+  TRK9C8B7A6D5F: {
+    originAddress: "1201 Western Avenue",
+    originRegion: "WA",
+    originPostalCode: "98101",
+    originCountry: "United States",
+    originLat: 47.6062,
+    originLng: -122.3321,
+    destinationAddress: "1 Ferry Building",
+    destinationRegion: "CA",
+    destinationPostalCode: "94111",
+    destinationCountry: "United States",
+    destinationLat: 37.7955,
+    destinationLng: -122.3937,
+  },
+  TRK2E4F6A8B0C: {
+    originLat: 43.6532,
+    originLng: -79.3832,
+    destinationLat: 40.7128,
+    destinationLng: -74.006,
+  },
+  TRK7D5E3F1A9B: {
+    originAddress: "Via Monte Napoleone 8",
+    originRegion: "MI",
+    originPostalCode: "20121",
+    originCountry: "Italy",
+    originLat: 45.4685,
+    originLng: 9.1914,
+    destinationAddress: "10 Bayfront Avenue",
+    destinationRegion: "Central Region",
+    destinationPostalCode: "018956",
+    destinationCountry: "Singapore",
+    destinationLat: 1.283,
+    destinationLng: 103.855,
+  },
+};
+
+mockShipments.forEach((shipment, index) => {
+  Object.assign(shipment, mockShipmentExtras[shipment.trackingNumber] || {});
+  // Leave the last two shipments unassigned so the UI shows both states.
+  shipment.deliveryPersonId =
+    index < 5 ? mockCouriers[index % mockCouriers.length].id : null;
+});
+
 // -------------------------------------------------------------------
 // 8 mock relay points (Americas, Europe and Asia-Pacific).
 // -------------------------------------------------------------------
@@ -389,6 +511,63 @@ export const mockRelayPoints = [
     distance: 1.7,
   },
 ];
+
+// Coordinates and structured address fields for the mock relay points.
+const mockRelayMeta = {
+  "Relay Point Midtown Manhattan": {
+    region: "NY",
+    country: "United States",
+    lat: 40.7502,
+    lng: -73.9844,
+  },
+  "Relay Point Brooklyn Heights": {
+    region: "NY",
+    country: "United States",
+    lat: 40.6957,
+    lng: -73.9943,
+  },
+  "Relay Point Canary Wharf": {
+    region: "Greater London",
+    country: "United Kingdom",
+    lat: 51.5054,
+    lng: -0.0203,
+  },
+  "Relay Point Shoreditch": {
+    region: "Greater London",
+    country: "United Kingdom",
+    lat: 51.5255,
+    lng: -0.0795,
+  },
+  "Relay Point Paris 11": {
+    region: "Ile-de-France",
+    country: "France",
+    lat: 48.8566,
+    lng: 2.3772,
+  },
+  "Relay Point Berlin Mitte": {
+    region: "Berlin",
+    country: "Germany",
+    lat: 52.5298,
+    lng: 13.4006,
+  },
+  "Relay Point Marina Bay": {
+    region: "Central Region",
+    country: "Singapore",
+    lat: 1.283,
+    lng: 103.855,
+  },
+  "Relay Point Queen West": {
+    region: "ON",
+    country: "Canada",
+    lat: 43.647,
+    lng: -79.396,
+  },
+};
+
+mockRelayPoints.forEach((point) => {
+  Object.assign(point, mockRelayMeta[point.name] || {});
+  point.isActive = true;
+});
 
 // -------------------------------------------------------------------
 // Mock admin user (used by the mock login).

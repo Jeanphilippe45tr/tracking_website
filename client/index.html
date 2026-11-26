@@ -33,27 +33,27 @@
     />
     <link rel="canonical" href="https://www.swifttrack.com/" />
 
-    <!-- Fonts -->
+    <!-- Fonts. Loaded without blocking the first paint: if Google Fonts is
+         slow or blocked, the app still renders immediately with the
+         system fallback font. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      />
+    </noscript>
 
     <!-- Photography (Unsplash CDN) -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
 
-    <!-- Leaflet (map on the tracking page and the relay points) -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      crossorigin=""
-    />
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      crossorigin=""
-    ></script>
   </head>
   <body>
     <div id="root"></div>

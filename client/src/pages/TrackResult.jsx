@@ -8,7 +8,12 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getShipmentByTrackingNumber } from "../api/shipments";
 import { useLiveTracking } from "../context/LiveTrackingContext";
-import { positionAt, trailAt } from "../lib/liveTracking";
+import {
+  buildRoute,
+  positionAt,
+  trailAt,
+  validCoords,
+} from "../lib/liveTracking";
 import StatusBadge from "../components/StatusBadge";
 import ProgressStepper from "../components/ProgressStepper";
 import Timeline from "../components/Timeline";
@@ -25,6 +30,19 @@ import "../styles/live.css";
 
 // The carriers we can show next to a shipment.
 const CARRIERS = ["SwiftTrack Express", "SwiftTrack Standard", "DHL Express", "UPS", "FedEx"];
+
+// Use the coordinates stored by the geocoder when available, and fall
+// back to the built-in city list for older rows.
+function storedCoords(shipment, prefix) {
+  const lat = Number(shipment?.[`${prefix}Lat`]);
+  const lng = Number(shipment?.[`${prefix}Lng`]);
+  if (validCoords(lat, lng)) return [lat, lng];
+  return coordsFor(shipment?.[prefix]);
+}
+
+function addressLine(parts) {
+  return parts.filter(Boolean).join(", ");
+}
 
 // A simple estimate of the delivery date, based on the status.
 function estimateDelivery(shipment) {
@@ -85,6 +103,15 @@ export default function TrackResult() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [loadShipment]);
 
+  // Only follow the run that belongs to this shipment. Multiple runs can
+  // be active at once, so we look ours up by tracking number.
+  const liveRun = shipment
+    ? live.getRunForTracking(shipment.trackingNumber)
+    : null;
+  const liveForShipment = Boolean(liveRun);
+  const liveProgress = liveForShipment ? liveRun.progress : 0;
+  const liveLabel = liveForShipment ? liveRun.statusLabel : "";
+
   // The map points: origin, destination and every scanned location.
   // If the admin simulation is running for THIS shipment, we also add the
   // moving live marker and the travelled part of the route.
@@ -93,25 +120,29 @@ export default function TrackResult() {
       return {
         points: [],
         route: null,
+        link: null,
         trail: null,
         center: DEFAULT_CENTER,
         isLive: false,
       };
     }
 
-    const liveForShipment =
-      live.route.length > 0 && live.trackNumber === shipment.trackingNumber;
-
     const points = [];
-    const origin = coordsFor(shipment.origin);
-    const destination = coordsFor(shipment.destination);
+    const origin = storedCoords(shipment, "origin");
+    const destination = storedCoords(shipment, "destination");
 
     if (origin) {
       points.push({
         lat: origin[0],
         lng: origin[1],
         title: `Origin — ${shipment.origin}`,
-        subtitle: "Parcel collected here",
+        subtitle:
+          addressLine([
+            shipment.originAddress,
+            shipment.originRegion,
+            shipment.originPostalCode,
+            shipment.originCountry,
+          ]) || "Parcel collected here",
         color: "#0b2d5c",
       });
     }
@@ -120,14 +151,24 @@ export default function TrackResult() {
         lat: destination[0],
         lng: destination[1],
         title: `Destination — ${shipment.destination}`,
-        subtitle: "Where the parcel is going",
+        subtitle:
+          addressLine([
+            shipment.destinationAddress,
+            shipment.destinationRegion,
+            shipment.destinationPostalCode,
+            shipment.destinationCountry,
+          ]) || "Where the parcel is going",
         color: "#f5821f",
       });
     }
 
-    // Intermediate scans become their own markers.
-    shipment.events.forEach((event) => {
-      const coords = coordsFor(event.location);
+    // Intermediate scans become their own markers. The geocoder stores
+    // coordinates on each event; older events fall back to the city name.
+    (shipment.events || []).forEach((event) => {
+      const coords =
+        validCoords(Number(event.lat), Number(event.lng))
+          ? [Number(event.lat), Number(event.lng)]
+          : coordsFor(event.location);
       if (!coords) return;
       points.push({
         lat: coords[0],
@@ -138,20 +179,30 @@ export default function TrackResult() {
       });
     });
 
-    let route = origin && destination ? [origin, destination] : null;
+    let route =
+      origin && destination
+        ? buildRoute(
+            shipment.origin,
+            shipment.destination,
+            origin,
+            destination
+          )
+        : null;
     let trail = null;
+    let link = origin && destination ? [origin, destination] : null;
 
     if (liveForShipment) {
-      route = live.route;
-      trail = trailAt(live.route, live.progress);
-      const position = positionAt(live.route, live.progress);
+      route = liveRun.route;
+      link = liveRun.link || link;
+      trail = trailAt(liveRun.route, liveProgress);
+      const position = positionAt(liveRun.route, liveProgress);
       if (position) {
         points.push({
           lat: position.lat,
           lng: position.lng,
           title: "Live position",
-          subtitle: `${live.statusLabel} · ${Math.round(
-            live.progress * 100
+          subtitle: `${liveLabel} · ${Math.round(
+            liveProgress * 100
           )}% of the route`,
           color: "#16a34a",
           kind: "live",
@@ -162,11 +213,12 @@ export default function TrackResult() {
     return {
       points,
       route,
+      link,
       trail,
       center: origin || destination || DEFAULT_CENTER,
       isLive: liveForShipment,
     };
-  }, [shipment, live]);
+  }, [shipment, liveForShipment, liveRun, liveProgress, liveLabel]);
 
   // Copy the tracking link so the recipient can open it too.
   const handleCopy = async () => {
@@ -264,9 +316,9 @@ export default function TrackResult() {
             </div>
             <div className="track-header-side">
               {mapData.isLive && (
-                <span className={`live-inline is-${live.status}`}>
+                <span className={`live-inline is-${liveRun.status}`}>
                   <span className="live-dot" />
-                  Live · {live.statusLabel}
+                  Live · {liveLabel}
                 </span>
               )}
               <StatusBadge status={shipment.status} />
@@ -333,6 +385,7 @@ export default function TrackResult() {
             <MapView
               points={mapData.points}
               route={mapData.route}
+              link={mapData.link}
               trail={mapData.trail}
               center={mapData.center}
               zoom={6}
@@ -363,12 +416,58 @@ export default function TrackResult() {
             )}
           </div>
           <div className="info-card card">
+            <h3>Delivery person</h3>
+            {shipment.deliveryPerson ? (
+              <>
+                <p>{shipment.deliveryPerson.name}</p>
+                {shipment.deliveryPerson.vehicle && (
+                  <p className="info-muted">{shipment.deliveryPerson.vehicle}</p>
+                )}
+                {shipment.deliveryPerson.phone && (
+                  <p className="info-muted">{shipment.deliveryPerson.phone}</p>
+                )}
+              </>
+            ) : (
+              <p className="info-muted">Not assigned yet</p>
+            )}
+          </div>
+          <div className="info-card card">
             <h3>From</h3>
             <p>{shipment.origin}</p>
+            {addressLine([
+              shipment.originAddress,
+              shipment.originRegion,
+              shipment.originPostalCode,
+              shipment.originCountry,
+            ]) && (
+              <p className="info-muted">
+                {addressLine([
+                  shipment.originAddress,
+                  shipment.originRegion,
+                  shipment.originPostalCode,
+                  shipment.originCountry,
+                ])}
+              </p>
+            )}
           </div>
           <div className="info-card card">
             <h3>To</h3>
             <p>{shipment.destination}</p>
+            {addressLine([
+              shipment.destinationAddress,
+              shipment.destinationRegion,
+              shipment.destinationPostalCode,
+              shipment.destinationCountry,
+            ]) && (
+              <p className="info-muted">
+                {addressLine([
+                  shipment.destinationAddress,
+                  shipment.destinationRegion,
+                  shipment.destinationPostalCode,
+                  shipment.destinationCountry,
+                ])}
+              </p>
+            )}
           </div>
         </div>
 

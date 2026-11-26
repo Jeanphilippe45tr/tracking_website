@@ -1,46 +1,53 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const sequelize = require("./db");
-const { RelayPoint, AdminUser, defaultPrefs } = require("./models");
-const { hashPassword } = require("./lib");
-const relayPoints = require("./data/relayPoints.json");
+// -------------------------------------------------------------------
+// Server bootstrap
+// -------------------------------------------------------------------
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = require("./app");
+const env = require("./config/env");
+const { sequelize, syncModels } = require("./models");
+const { seedAll } = require("./seed");
 
-app.get("/api/health", (req, res) => res.json({ status: "ok" }));
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/relay-points", require("./routes/relayPoints"));
-app.use("/api/shipments", require("./routes/shipments"));
+async function start() {
+  await sequelize.authenticate();
+  console.log(
+    `Connected to MySQL database "${env.db.name}" on ${env.db.host}:${env.db.port}`
+  );
 
-// Seed relay points once, and create the first admin from env vars.
-async function seed() {
-  if ((await RelayPoint.count()) === 0) {
-    await RelayPoint.bulkCreate(relayPoints.map(({ id, ...rest }) => rest));
+  if (env.seedOnStart) {
+    const summary = await seedAll();
+    console.log(
+      `Seed ready: ${summary.shipments} shipments, ${summary.relayPoints} relay points, ` +
+        `${summary.couriers} delivery people, ${summary.conversations} conversation(s), ` +
+        `admin ${summary.admin}`
+    );
+  } else if (env.syncDatabase) {
+    await syncModels();
+    console.log("Database tables are up to date.");
   }
-  const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD;
-  if (email && password && (await AdminUser.count()) === 0) {
-    await AdminUser.create({
-      email,
-      passwordHash: hashPassword(password),
-      prefs: defaultPrefs,
+
+  const server = app.listen(env.port, () => {
+    console.log(`API running at http://localhost:${env.port}/api`);
+  });
+
+  const shutdown = async (signal) => {
+    console.log(`\n${signal} received - shutting down...`);
+    server.close(async () => {
+      try {
+        await sequelize.close();
+      } finally {
+        process.exit(0);
+      }
     });
-    console.log("Created initial admin user");
-  }
+    // Force exit if connections refuse to close.
+    setTimeout(() => process.exit(1), 10000).unref();
+  };
+
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
-sequelize
-  .sync({ alter: true })
-  .then(seed)
-  .then(() => {
-    console.log("Database connected");
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error("Database error:", err.message);
-    process.exit(1);
-  });
+start().catch((err) => {
+  console.error("Failed to start the server:", err.message);
+  if (err.original) console.error(err.original.message);
+  process.exit(1);
+});

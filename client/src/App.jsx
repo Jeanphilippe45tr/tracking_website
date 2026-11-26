@@ -37,6 +37,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import ShipmentsList from "./pages/admin/ShipmentsList";
 import CreateShipment from "./pages/admin/CreateShipment";
 import ShipmentDetail from "./pages/admin/ShipmentDetail";
+import Couriers from "./pages/admin/Couriers";
+import RelayPointAdmin from "./pages/admin/RelayPointAdmin";
 import Messages from "./pages/admin/Messages";
 import Settings from "./pages/admin/Settings";
 
@@ -220,6 +222,26 @@ export default function App() {
               <ProtectedRoute>
                 <AdminLayout>
                   <ShipmentDetail />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/couriers"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Couriers />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/relay-points"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <RelayPointAdmin />
                 </AdminLayout>
               </ProtectedRoute>
             }

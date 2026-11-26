@@ -1,25 +1,49 @@
 const jwt = require("jsonwebtoken");
-const { AdminUser } = require("../models");
-
-const secret = () => process.env.JWT_SECRET;
+const env = require("../config/env");
 
 function signToken(user) {
-  return jwt.sign({ id: user.id }, secret(), { expiresIn: "7d" });
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    env.jwt.secret,
+    { expiresIn: env.jwt.expiresIn }
+  );
 }
 
-async function requireAdmin(req, res, next) {
+function verifyToken(token) {
+  return jwt.verify(token, env.jwt.secret);
+}
+
+function requireAuth(req, res, next) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+
+  if (!token) {
+    const error = new Error("Please sign in to continue.");
+    error.status = 401;
+    return next(error);
+  }
+
   try {
-    const header = req.headers.authorization || "";
-    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-    if (!token || !secret()) return res.status(401).json({ error: "Not authenticated" });
-    const { id } = jwt.verify(token, secret());
-    const user = await AdminUser.findByPk(id);
-    if (!user) return res.status(401).json({ error: "Not authenticated" });
-    req.user = user;
-    next();
-  } catch {
-    res.status(401).json({ error: "Session expired. Please log in again." });
+    req.auth = verifyToken(token);
+    return next();
+  } catch (err) {
+    const error = new Error("Your session has expired or is invalid.");
+    error.status = 401;
+    return next(error);
   }
 }
 
-module.exports = { signToken, requireAdmin };
+function requireAdmin(req, res, next) {
+  if (req.auth?.role !== "admin") {
+    const error = new Error("You do not have access to this resource.");
+    error.status = 403;
+    return next(error);
+  }
+  return next();
+}
+
+module.exports = { signToken, verifyToken, requireAuth, requireAdmin };

@@ -256,6 +256,8 @@
   gap: 0.2rem;
   overflow-x: auto;
   scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
 }
 
 .admin-nav-links::-webkit-scrollbar {
@@ -392,8 +394,7 @@
   display: flex;
 }
 
-.sim-map .map-canvas,
-.sim-map .map-fallback {
+.sim-map .map-canvas {
   flex: 1;
 }
 
@@ -439,6 +440,17 @@
   font-size: 0.75rem;
 }
 
+.sim-coords {
+  margin: 0.1rem 0 0;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-preview-coords {
+  margin: -0.25rem 0 0.1rem;
+}
+
 .sim-percent {
   font-size: 1.35rem;
   font-weight: 800;
@@ -478,6 +490,130 @@
   align-items: center;
   gap: 0.3rem;
   margin-top: auto;
+}
+
+.sim-error {
+  margin-bottom: 0.8rem;
+}
+
+.sim-start-row {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin: 0.55rem 0 0.7rem;
+}
+
+.sim-start-row .btn {
+  flex: 1;
+  min-width: 130px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.82rem;
+}
+
+.sim-run-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.sim-run-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sim-run-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.sim-run {
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--run, var(--color-primary));
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.65rem 0.6rem;
+  background: #fff;
+}
+
+.sim-run-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.sim-run-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--run, var(--color-primary));
+  flex: none;
+}
+
+.sim-run-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.sim-run-title strong {
+  font-size: 0.84rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sim-run-percent {
+  font-weight: 800;
+  color: var(--run, var(--color-accent));
+  font-size: 0.9rem;
+}
+
+.sim-run .sim-route {
+  margin: 0.2rem 0 0.4rem;
+}
+
+.sim-run .progress-track {
+  height: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.sim-run .sim-meta {
+  margin-bottom: 0.45rem;
+}
+
+.sim-run-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.sim-run-actions .btn {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.74rem;
+}
+
+.sim-speed-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+
+.sim-speed-label .form-input {
+  padding: 0.3rem 0.4rem;
+  font-size: 0.75rem;
+  width: 78px;
+}
+
+.sim-empty-note {
+  font-size: 0.82rem;
+  margin: 0.2rem 0;
 }
 
 /* ---------------- Messages summary ---------------- */
@@ -941,5 +1077,106 @@
   .danger-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* ---------------- Couriers / relay-point admin ---------------- */
+.admin-split {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.5fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.admin-split .admin-section {
+  margin-bottom: 0;
+}
+
+.admin-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--color-primary);
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.status-pill.is-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.is-inactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.detail-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.detail-actions .btn {
+  padding: 0.48rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.courier-current {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+}
+
+.courier-current p {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+}
+
+.courier-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1040px) {
+  .admin-split {
+    grid-template-columns: 1fr;
   }
 }

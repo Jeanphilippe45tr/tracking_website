@@ -28,7 +28,8 @@ function defaultAccount() {
     joinedAt: "2026-01-12T09:00:00.000Z",
     passwordChangedAt: null,
     prefs: {
-      defaultSpeed: 2,
+      defaultSpeed: 2, // legacy value, kept for older stored accounts
+      defaultTransportMode: "road",
       chatWelcome:
         "Hi! 👋 You are chatting with the SwiftTrack team. Tell us your tracking number and how we can help — a human replies here in a few minutes.",
       supportEmail: "support@swifttrack.com",

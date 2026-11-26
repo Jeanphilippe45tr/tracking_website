@@ -211,6 +211,12 @@ export default function Dashboard() {
               <Link to="/admin/shipments" className="quick-action">
                 <Icon name="parcel" size={16} /> All shipments
               </Link>
+              <Link to="/admin/couriers" className="quick-action">
+                <Icon name="truck" size={16} /> Couriers
+              </Link>
+              <Link to="/admin/relay-points" className="quick-action">
+                <Icon name="pin" size={16} /> Relay points
+              </Link>
               <Link to="/admin/messages" className="quick-action">
                 <Icon name="chat" size={16} /> Message inbox
               </Link>

@@ -1,8 +1,6 @@
 // -------------------------------------------------------------------
 // Login — admin sign-in page (/admin/login).
 // -------------------------------------------------------------------
-// Mock credentials: admin@example.com / admin123
-// -------------------------------------------------------------------
 
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -129,10 +127,7 @@ export default function Login() {
           {loading ? "Signing in..." : "Sign in"}
         </button>
 
-        <p className="login-hint">
-          Demo credentials: <code>admin@example.com</code> /{" "}
-          <code>admin123</code>. Change them in the admin Settings page.
-        </p>
+        
 
         <Link to="/" className="login-back">
           ← Back to site

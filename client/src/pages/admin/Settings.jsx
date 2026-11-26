@@ -18,19 +18,23 @@ import {
   updateProfile,
 } from "../../api/auth";
 import { useAdminAccount } from "../../lib/adminAccount";
+import { USE_MOCK } from "../../api/client";
 import {
   clearAllConversations,
   unreadForAdmin,
   useChatStore,
 } from "../../lib/chat";
-import { resetLive } from "../../lib/liveTracking";
+import {
+  DEFAULT_TRANSPORT_MODE,
+  TRANSPORT_MODES,
+  resetLive,
+  transportModeById,
+} from "../../lib/liveTracking";
 import { formatDate } from "../../utils/format";
 import Icon from "../../components/Icon";
 import "../../styles/admin.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const SPEED_OPTIONS = [1, 2, 5, 10];
 
 function initials(name = "") {
   return (
@@ -65,7 +69,19 @@ const STRENGTH = [
 
 export default function Settings() {
   const { user, updateUser } = useAuth();
-  const account = useAdminAccount();
+  // Mock mode keeps the editable profile in localStorage; with the real
+  // backend the source of truth is the user returned by /auth/me.
+  const localAccount = useAdminAccount();
+  const account = USE_MOCK
+    ? localAccount
+    : {
+        ...localAccount,
+        ...(user || {}),
+        prefs: {
+          ...localAccount.prefs,
+          ...(user?.prefs || {}),
+        },
+      };
   const chatState = useChatStore();
   const unread = unreadForAdmin(chatState);
 
@@ -97,7 +113,11 @@ export default function Settings() {
     notifyStatusChanges: account.prefs.notifyStatusChanges,
   });
   const [simPrefs, setSimPrefs] = useState({
-    defaultSpeed: account.prefs.defaultSpeed,
+    defaultTransportMode: transportModeById(
+      user?.prefs?.defaultTransportMode ||
+        account.prefs.defaultTransportMode ||
+        DEFAULT_TRANSPORT_MODE
+    ).id,
   });
   const [savingPrefs, setSavingPrefs] = useState("");
 
@@ -108,6 +128,13 @@ export default function Settings() {
 
   const score = passwordScore(passwords.next);
   const strength = STRENGTH[score];
+
+  // Keep the shared auth user (localStorage) in sync after saving prefs
+  // so other pages see the change immediately.
+  const savePrefsToContext = (patch) => {
+    if (USE_MOCK || !user) return;
+    updateUser({ ...user, prefs: { ...(user.prefs || {}), ...patch } });
+  };
 
   // ---------------- Handlers ----------------
   const handleProfile = async (event) => {
@@ -163,6 +190,9 @@ export default function Settings() {
     setStatus((previous) => ({ ...previous, password: null }));
     try {
       await changePassword(passwords.current, passwords.next);
+      if (!USE_MOCK && user) {
+        updateUser({ ...user, passwordChangedAt: new Date().toISOString() });
+      }
       setPasswords({ current: "", next: "", confirm: "" });
       setSectionStatus(
         "password",
@@ -189,10 +219,12 @@ export default function Settings() {
 
     setSavingPrefs("chat");
     try {
-      await updatePreferences({
+      const patch = {
         chatWelcome: chatPrefs.chatWelcome.trim(),
         supportEmail: chatPrefs.supportEmail.trim(),
-      });
+      };
+      await updatePreferences(patch);
+      savePrefsToContext(patch);
       setSectionStatus("chat", "success", "Chat preferences saved.");
     } catch (err) {
       setSectionStatus("chat", "error", err.message || "Could not save.");
@@ -206,6 +238,7 @@ export default function Settings() {
     setSavingPrefs("notify");
     try {
       await updatePreferences(notifyPrefs);
+      savePrefsToContext(notifyPrefs);
       setSectionStatus("notify", "success", "Notification settings saved.");
     } catch (err) {
       setSectionStatus("notify", "error", err.message || "Could not save.");
@@ -218,10 +251,10 @@ export default function Settings() {
     event.preventDefault();
     setSavingPrefs("sim");
     try {
-      await updatePreferences({
-        defaultSpeed: Number(simPrefs.defaultSpeed),
-      });
-      setSectionStatus("sim", "success", "Default speed saved.");
+      const patch = { defaultTransportMode: simPrefs.defaultTransportMode };
+      await updatePreferences(patch);
+      savePrefsToContext(patch);
+      setSectionStatus("sim", "success", "Default transport mode saved.");
     } catch (err) {
       setSectionStatus("sim", "error", err.message || "Could not save.");
     } finally {
@@ -622,26 +655,29 @@ export default function Settings() {
               <Icon name="radar" size={18} /> Live simulation defaults
             </h2>
             <p className="section-help">
-              The speed used when the dashboard control panel starts a new
-              route. You can still change it per run.
+              The transport mode used when the dashboard starts a new route.
+              Travel time is calculated from the route distance at real-world
+              speed. You can still change it per run.
             </p>
 
             <form onSubmit={handleSimPrefs}>
               <div className="form-group">
-                <label htmlFor="default-speed">Default simulation speed</label>
+                <label htmlFor="default-transport">
+                  Default transport mode
+                </label>
                 <select
-                  id="default-speed"
+                  id="default-transport"
                   className="form-input"
-                  value={simPrefs.defaultSpeed}
+                  value={simPrefs.defaultTransportMode}
                   onChange={(event) =>
                     setSimPrefs({
-                      defaultSpeed: Number(event.target.value),
+                      defaultTransportMode: event.target.value,
                     })
                   }
                 >
-                  {SPEED_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}× {option === 1 ? "(2 minutes)" : ""}
+                  {TRANSPORT_MODES.map((mode) => (
+                    <option key={mode.id} value={mode.id}>
+                      {mode.label} · {mode.speedKmh} km/h ({mode.note})
                     </option>
                   ))}
                 </select>

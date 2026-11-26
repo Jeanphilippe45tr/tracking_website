@@ -1,60 +1,186 @@
+// -------------------------------------------------------------------
+// Authentication routes
+// -------------------------------------------------------------------
+// Matches the API contract the frontend uses:
+//   POST  /api/auth/login           -> { token, user }
+//   GET   /api/auth/me              -> current user (token check)
+//   PATCH /api/auth/me              -> update name/email/phone
+//   POST  /api/auth/change-password -> { ok: true }
+//   PATCH /api/auth/preferences     -> updated preferences
+// -------------------------------------------------------------------
+
 const express = require("express");
-const { AdminUser, defaultPrefs } = require("../models");
-const { hashPassword, verifyPassword } = require("../lib");
-const { signToken, requireAdmin } = require("../middleware/auth");
+const { User } = require("../models");
+const { signToken, requireAuth } = require("../middleware/auth");
+const { asyncHandler, badRequest, unauthorized, conflict } = require("../utils/errors");
+const { validate, assertValid, pick, EMAIL_RE } = require("../utils/validation");
+const { DEFAULT_PREFS, PREFERENCE_KEYS } = require("../config/constants");
+const { normalizePrefs } = require("../utils/prefs");
+const { TRANSPORT_MODES } = require("../utils/travel");
 
 const router = express.Router();
 
-const publicUser = (u) => ({
-  id: u.id,
-  name: u.name,
-  email: u.email,
-  phone: u.phone,
-  role: u.role,
-  joinedAt: u.createdAt,
-});
+// POST /api/auth/login
+router.post(
+  "/login",
+  asyncHandler(async (req, res) => {
+    const errors = validate(req.body, {
+      email: { required: true, type: "email", label: "Email" },
+      password: { required: true, label: "Password" },
+    });
+    assertValid(errors);
 
-router.post("/login", async (req, res) => {
-  const email = String(req.body?.email || "").trim().toLowerCase();
-  const password = String(req.body?.password || "");
-  const user = await AdminUser.findOne({ where: { email } });
-  if (!user || !verifyPassword(password, user.passwordHash)) {
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
-  res.json({ token: signToken(user), user: publicUser(user) });
-});
+    const email = String(req.body.email).trim().toLowerCase();
+    const user = await User.findOne({ where: { email } });
 
-router.patch("/me", requireAdmin, async (req, res) => {
-  try {
-    const { name, email, phone } = req.body || {};
-    if (name !== undefined) req.user.name = String(name).trim();
-    if (email !== undefined) req.user.email = String(email).trim().toLowerCase();
-    if (phone !== undefined) req.user.phone = String(phone).trim();
-    await req.user.save();
-    res.json(publicUser(req.user));
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+    // Same message for "no such user" and "wrong password" on purpose.
+    if (!user || !(await user.verifyPassword(req.body.password))) {
+      throw unauthorized("Invalid email or password");
+    }
 
-router.post("/change-password", requireAdmin, async (req, res) => {
-  const { currentPassword, newPassword } = req.body || {};
-  if (!verifyPassword(String(currentPassword || ""), req.user.passwordHash)) {
-    return res.status(400).json({ error: "Your current password is incorrect." });
-  }
-  if (!newPassword || String(newPassword).length < 6) {
-    return res.status(400).json({ error: "New password must be at least 6 characters." });
-  }
-  req.user.passwordHash = hashPassword(String(newPassword));
-  req.user.passwordChangedAt = new Date();
-  await req.user.save();
-  res.json({ ok: true });
-});
+    res.json({ token: signToken(user), user: user.toJSON() });
+  })
+);
 
-router.patch("/preferences", requireAdmin, async (req, res) => {
-  req.user.prefs = { ...defaultPrefs, ...(req.user.prefs || {}), ...(req.body || {}) };
-  await req.user.save();
-  res.json(req.user.prefs);
-});
+// GET /api/auth/me - lets the frontend validate a saved token on refresh.
+router.get(
+  "/me",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const user = await User.findByPk(req.auth.id);
+    if (!user) throw unauthorized("Your account no longer exists.");
+    res.json(user.toJSON());
+  })
+);
+
+// PATCH /api/auth/me - update the admin profile.
+router.patch(
+  "/me",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const user = await User.findByPk(req.auth.id);
+    if (!user) throw unauthorized("Your account no longer exists.");
+
+    const errors = validate(req.body, {
+      name: { minLength: 2, maxLength: 120, label: "Name" },
+      email: { type: "email", label: "Email" },
+      phone: { maxLength: 40, label: "Phone" },
+    });
+    assertValid(errors);
+
+    if (req.body.name !== undefined) user.name = String(req.body.name).trim();
+    if (req.body.phone !== undefined) user.phone = String(req.body.phone).trim();
+
+    if (req.body.email !== undefined) {
+      const email = String(req.body.email).trim().toLowerCase();
+      if (!EMAIL_RE.test(email)) throw badRequest("Enter a valid email address.", {
+        email: "Enter a valid email address.",
+      });
+      const taken = await User.findOne({ where: { email } });
+      if (taken && taken.id !== user.id) {
+        throw conflict("That email address is already in use.");
+      }
+      user.email = email;
+    }
+
+    await user.save();
+    res.json(user.toJSON());
+  })
+);
+
+// POST /api/auth/change-password
+router.post(
+  "/change-password",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const errors = validate(req.body, {
+      currentPassword: { required: true, label: "Current password" },
+      newPassword: {
+        required: true,
+        minLength: 8,
+        label: "New password",
+        minLengthMessage: "Your new password must be at least 8 characters.",
+      },
+    });
+    assertValid(errors);
+
+    const user = await User.findByPk(req.auth.id);
+    if (!user) throw unauthorized("Your account no longer exists.");
+
+    if (!(await user.verifyPassword(req.body.currentPassword))) {
+      throw badRequest("Your current password is incorrect.", {
+        currentPassword: "Your current password is incorrect.",
+      });
+    }
+
+    user.passwordHash = await User.hashPassword(req.body.newPassword);
+    user.passwordChangedAt = new Date();
+    await user.save();
+
+    res.json({ ok: true });
+  })
+);
+
+// PATCH /api/auth/preferences - chat, notification and simulation prefs.
+router.patch(
+  "/preferences",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const user = await User.findByPk(req.auth.id);
+    if (!user) throw unauthorized("Your account no longer exists.");
+
+    const incoming = req.body || {};
+    const prefs = normalizePrefs(user.prefs);
+
+    for (const key of PREFERENCE_KEYS) {
+      if (incoming[key] === undefined) continue;
+
+      if (key === "defaultTransportMode") {
+        const mode = String(incoming[key] || "").toLowerCase();
+        if (!TRANSPORT_MODES.includes(mode)) {
+          throw badRequest("Choose a valid transport mode.");
+        }
+        prefs[key] = mode;
+        continue;
+      }
+
+      if (key === "defaultSpeed") {
+        const speed = Number(incoming[key]);
+        if (!Number.isFinite(speed)) {
+          throw badRequest("Default speed must be a number.");
+        }
+        prefs[key] = Math.min(20, Math.max(0.5, speed));
+        continue;
+      }
+
+      if (key === "notifyNewMessages" || key === "notifyStatusChanges") {
+        prefs[key] = Boolean(incoming[key]);
+        continue;
+      }
+
+      if (typeof incoming[key] === "string") {
+        const text = incoming[key].trim();
+        if (
+          key === "supportEmail" &&
+          text &&
+          !EMAIL_RE.test(text)
+        ) {
+          throw badRequest("Enter a valid support email.", {
+            supportEmail: "Enter a valid support email.",
+          });
+        }
+        prefs[key] = text;
+        continue;
+      }
+
+      prefs[key] = incoming[key];
+    }
+
+    user.prefs = prefs;
+    await user.save();
+
+    res.json(normalizePrefs(user.prefs));
+  })
+);
 
 module.exports = router;

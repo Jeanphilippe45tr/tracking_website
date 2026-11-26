@@ -12,6 +12,8 @@ import Icon from "./Icon";
 const ITEMS = [
   { to: "/admin", label: "Dashboard", icon: "box", end: true },
   { to: "/admin/shipments", label: "Shipments", icon: "parcel" },
+  { to: "/admin/couriers", label: "Couriers", icon: "truck" },
+  { to: "/admin/relay-points", label: "Relay points", icon: "pin" },
   { to: "/admin/messages", label: "Messages", icon: "chat", badge: true },
   { to: "/admin/settings", label: "Settings", icon: "shield" },
 ];
